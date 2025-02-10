@@ -1,3 +1,63 @@
+function addNewTeam() {
+    const teamNameInput = document.getElementById('newTeamName');
+    const teamName = teamNameInput.value.trim();
+
+    if (!teamName) {
+        showAlert('Please enter a team name', 'warning');
+        return;
+    }
+
+    fetch('/admin/teams/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ team_name: teamName })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Team added successfully', 'success');
+                teamNameInput.value = '';
+                loadTeams();
+            } else {
+                showAlert(data.message || 'Failed to add team', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while adding team');
+        });
+}
+
+function checkDeadlineForMenuItems() {
+    fetch('/get_deadline')
+        .then(response => response.json())
+        .then(data => {
+            const deadline = new Date(data.deadline);
+            const now = new Date();
+
+            // Get menu items
+            const winnersButton = document.querySelector('[data-bs-target="#winnersModal"]');
+            const detailsButton = document.querySelector('[data-bs-target="#hackathonDetailsModal"]');
+
+            if (winnersButton && detailsButton) {
+                // Show winners only after deadline
+                if (winnersButton.parentElement) {
+                    winnersButton.parentElement.style.display = now > deadline ? 'block' : 'none';
+                }
+
+                // Show details only before deadline
+                if (detailsButton.parentElement) {
+                    detailsButton.parentElement.style.display = now <= deadline ? 'block' : 'none';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking deadline:', error);
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer
     initializeCountdown();
@@ -5,34 +65,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update hackathon details deadlines
     updateHackathonDeadlines();
 
+    // Check deadline for menu items visibility
+    checkDeadlineForMenuItems();
+
     // Form validation
     const submissionForm = document.getElementById('projectSubmissionForm');
-    const inputs = submissionForm.querySelectorAll('input[required]');
-
-    inputs.forEach(input => {
-        input.addEventListener('input', validateInput);
-        input.addEventListener('blur', validateInput);
-    });
-
-    submissionForm.addEventListener('submit', handleSubmission);
+    if (submissionForm) {
+        const inputs = submissionForm.querySelectorAll('input[required]');
+        inputs.forEach(input => {
+            input.addEventListener('input', validateInput);
+            input.addEventListener('blur', validateInput);
+        });
+        submissionForm.addEventListener('submit', handleSubmission);
+    }
 
     // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon();
 
-    // Show submissions button since form is visible by default
-    document.getElementById('viewSubmissionsBtn').style.display = 'block';
-
-    // Load submissions after the page loads
-    loadSubmissions();
+    // Load submissions if the element exists
+    const submissionsList = document.getElementById('submissionsList');
+    if (submissionsList) {
+        loadSubmissions();
+    }
 
     // Add admin-related event listeners
     const adminLoginForm = document.getElementById('adminLoginForm');
-    const adminUpdateForm = document.getElementById('adminUpdateForm');
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', handleAdminLogin);
+    }
 
-    adminLoginForm.addEventListener('submit', handleAdminLogin);
-    adminUpdateForm.addEventListener('submit', handleAdminUpdate);
+    const adminUpdateForm = document.getElementById('adminUpdateForm');
+    if (adminUpdateForm) {
+        adminUpdateForm.addEventListener('submit', handleAdminUpdate);
+    }
 
     // Add event listener for winners modal
     const winnersModal = document.getElementById('winnersModal');
@@ -236,7 +303,7 @@ function loadSubmissions() {
 }
 
 
-// Add admin-related functions
+
 function handleAdminLogin(event) {
     event.preventDefault();
 

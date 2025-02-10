@@ -264,8 +264,38 @@
                                     <label for="newDeadline" class="form-label">Update Deadline</label>
                                     <input type="datetime-local" class="form-control neuromorphic-input" id="newDeadline" required>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="hackathonLogo" class="form-label">Update Hackathon Logo</label>
+                                    <input type="file" class="form-control neuromorphic-input" id="hackathonLogo" accept="image/*">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonTitle" class="form-label">Hackathon Title</label>
+                                    <input type="text" class="form-control neuromorphic-input" id="hackathonTitle">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonDescription" class="form-label">About the Event</label>
+                                    <textarea class="form-control neuromorphic-input" id="hackathonDescription" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonRules" class="form-label">Rules & Requirements</label>
+                                    <textarea class="form-control neuromorphic-input" id="hackathonRules" rows="5" placeholder="Enter each rule on a new line"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Prizes</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="firstPrize" placeholder="First Place Prize">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="secondPrize" placeholder="Second Place Prize">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="thirdPrize" placeholder="Third Place Prize">
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="text-center">
-                                    <button type="submit" class="btn">Update Deadline</button>
+                                    <button type="submit" class="btn">Update Hackathon Details</button>
                                 </div>
                             </form>
                         </div>
