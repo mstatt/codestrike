@@ -1,7 +1,12 @@
 function addNewTeam() {
     const teamNameInput = document.getElementById('newTeamName');
-    const teamName = teamNameInput.value.trim();
+    if (!teamNameInput) {
+        console.error('Team name input not found');
+        showAlert('Error: Team name input not found', 'danger');
+        return;
+    }
 
+    const teamName = teamNameInput.value.trim();
     if (!teamName) {
         showAlert('Please enter a team name', 'warning');
         return;
@@ -14,25 +19,37 @@ function addNewTeam() {
         },
         body: JSON.stringify({ team_name: teamName })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('Team added successfully', 'success');
-                teamNameInput.value = '';
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('Team added successfully', 'success');
+            teamNameInput.value = '';
+            if (typeof loadTeams === 'function') {
                 loadTeams();
-            } else {
-                showAlert(data.message || 'Failed to add team', 'danger');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('An error occurred while adding team');
-        });
+        } else {
+            showAlert(data.message || 'Failed to add team', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while adding team');
+    });
 }
 
 function checkDeadlineForMenuItems() {
     fetch('/get_deadline')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (!data.deadline) {
                 console.log('No deadline set');
@@ -46,15 +63,10 @@ function checkDeadlineForMenuItems() {
             }
 
             const now = new Date();
-
-            // Get menu items
             const winnersButton = document.querySelector('[data-bs-target="#winnersModal"]');
 
-            if (winnersButton) {
-                // Show winners only after deadline
-                if (winnersButton.parentElement) {
-                    winnersButton.parentElement.style.display = now > deadline ? 'block' : 'none';
-                }
+            if (winnersButton && winnersButton.parentElement) {
+                winnersButton.parentElement.style.display = now > deadline ? 'block' : 'none';
             }
         })
         .catch(error => {
@@ -189,7 +201,9 @@ function validateInput(event) {
 
 function toggleTheme() {
     const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
+    if (!html) return;
+
+    const currentTheme = html.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
     html.setAttribute('data-theme', newTheme);
@@ -199,15 +213,15 @@ function toggleTheme() {
 
 function updateThemeToggleIcon() {
     const themeToggleButton = document.querySelector('.dropdown-item i.bi[class*="bi-moon"], .dropdown-item i.bi[class*="bi-sun"]');
-    if (themeToggleButton) {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            themeToggleButton.classList.remove('bi-moon-fill');
-            themeToggleButton.classList.add('bi-sun-fill');
-        } else {
-            themeToggleButton.classList.remove('bi-sun-fill');
-            themeToggleButton.classList.add('bi-moon-fill');
-        }
+    if (!themeToggleButton) return;
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    if (currentTheme === 'dark') {
+        themeToggleButton.classList.remove('bi-moon-fill');
+        themeToggleButton.classList.add('bi-sun-fill');
+    } else {
+        themeToggleButton.classList.remove('bi-sun-fill');
+        themeToggleButton.classList.add('bi-moon-fill');
     }
 }
 
@@ -228,7 +242,6 @@ function showAlert(message, type = 'danger') {
         setTimeout(() => alert.remove(), 150);
     }, 5000);
 }
-
 
 
 function previewSubmission() {
@@ -942,7 +955,7 @@ function loadTeams() {
                 });
             } else {
                 showAlert(data.message || 'Failed to load teams', 'danger');
-                        }
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -1124,7 +1137,9 @@ function validateInput(event) {
 
 function toggleTheme() {
     const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
+    if (!html) return;
+
+    const currentTheme = html.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
     html.setAttribute('data-theme', newTheme);
@@ -1134,15 +1149,15 @@ function toggleTheme() {
 
 function updateThemeToggleIcon() {
     const themeToggleButton = document.querySelector('.dropdown-item i.bi[class*="bi-moon"], .dropdown-item i.bi[class*="bi-sun"]');
-    if (themeToggleButton) {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        if (currentTheme === 'dark') {
-            themeToggleButton.classList.remove('bi-moon-fill');
-            themeToggleButton.classList.add('bi-sun-fill');
-        } else {
-            themeToggleButton.classList.remove('bi-sun-fill');
-            themeToggleButton.classList.add('bi-moon-fill');
-        }
+    if (!themeToggleButton) return;
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    if (currentTheme === 'dark') {
+        themeToggleButton.classList.remove('bi-moon-fill');
+        themeToggleButton.classList.add('bi-sun-fill');
+    } else {
+        themeToggleButton.classList.remove('bi-sun-fill');
+        themeToggleButton.classList.add('bi-moon-fill');
     }
 }
 
@@ -1163,7 +1178,6 @@ function showAlert(message, type = 'danger') {
         setTimeout(() => alert.remove(), 150);
     }, 5000);
 }
-
 
 function handleSubmission(event) {
     event.preventDefault();
