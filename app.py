@@ -2,99 +2,108 @@ import os
 import json
 import csv
 from datetime import datetime
+from functools import lru_cache
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import logging
+from werkzeug.security import generate_password_hash, check_password_hash
+from logger_config import log_python_error, log_js_error, get_recent_logs
 
 logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = "a_much_stronger_secret_key"
+app.secret_key = os.urandom(24)
 
 SUBMISSIONS_FILE = 'submissions.json'
 USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 HACKATHON_DETAILS_FILE = 'hackathon_details.json'
 
-# Create users and teams file if it doesn't exist
-if not os.path.exists(USERS_AND_TEAMS_FILE):
-    with open(USERS_AND_TEAMS_FILE, 'w') as f:
-        json.dump({'teams': [], 'users': []}, f, indent=2)
+class FileAccessError(Exception):
+    """Custom exception for file access errors"""
+    pass
 
+def safe_file_operation(func):
+    """Decorator for safe file operations with proper error handling"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError as e:
+            logger.error(f"File not found error in {func.__name__}: {str(e)}")
+            raise FileAccessError(f"Required file not found: {str(e)}")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error in {func.__name__}: {str(e)}")
+            raise FileAccessError(f"Invalid JSON format: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error in {func.__name__}: {str(e)}")
+            raise FileAccessError(f"Unexpected error: {str(e)}")
+    return wrapper
+
+@lru_cache(maxsize=1)
+@safe_file_operation
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
         with open(SUBMISSIONS_FILE, 'r') as f:
             return json.load(f)
     return []
 
+@safe_file_operation
 def save_submission(submission):
     submissions = load_submissions()
     submission['submitted_at'] = datetime.now().isoformat()
     submissions.append(submission)
     with open(SUBMISSIONS_FILE, 'w') as f:
         json.dump(submissions, f, indent=2)
+    load_submissions.cache_clear()
 
+@lru_cache(maxsize=1)
+@safe_file_operation
 def load_users_and_teams():
     try:
         with open(USERS_AND_TEAMS_FILE, 'r') as f:
             data = json.load(f)
             return data.get('teams', []), data.get('users', [])
     except Exception as e:
-        logging.error(f"Error loading users and teams: {str(e)}")
+        logger.error(f"Error loading users and teams: {str(e)}")
         return [], []
 
+@safe_file_operation
 def save_users_and_teams(teams, users):
-    try:
-        with open(USERS_AND_TEAMS_FILE, 'w') as f:
-            json.dump({'teams': teams, 'users': users}, f, indent=2)
-    except Exception as e:
-        logging.error(f"Error saving users and teams: {str(e)}")
+    with open(USERS_AND_TEAMS_FILE, 'w') as f:
+        json.dump({'teams': teams, 'users': users}, f, indent=2)
+    load_users_and_teams.cache_clear()
 
 def is_registered_email(email):
     try:
         teams, users = load_users_and_teams()
         return any(user['email'].lower() == email.lower() for user in users)
     except Exception as e:
-        logging.error(f"Error checking registered emails: {str(e)}")
+        logger.error(f"Error checking registered emails: {str(e)}")
         return False
 
+@safe_file_operation
 def verify_admin_credentials(email, password):
-    try:
-        with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
-            stored_credentials = f.read().strip().split(':')
-            if len(stored_credentials) != 2:
-                logging.error(f"Invalid credential format: {stored_credentials}")
-                return False
-            stored_email, stored_password = stored_credentials
-            logging.debug(f"Login attempt - Email: {email}, Stored email: {stored_email}")
-            return email == stored_email and password == stored_password
-    except Exception as e:
-        logging.error(f"Error verifying admin credentials: {str(e)}")
-        return False
+    with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
+        stored_credentials = f.read().strip().split(':')
+        if len(stored_credentials) != 2:
+            logger.error(f"Invalid credential format in file")
+            return False
+        stored_email, stored_password_hash = stored_credentials
+        return email == stored_email and check_password_hash(stored_password_hash, password)
 
+@lru_cache(maxsize=1)
+@safe_file_operation
 def load_hackathon_details():
-    try:
-        if os.path.exists(HACKATHON_DETAILS_FILE):
-            with open(HACKATHON_DETAILS_FILE, 'r') as f:
-                return json.load(f)
-        return {
-            "title": "FALCONS.AI Hack-a-thon",
-            "description": "Join us for an exciting hackathon!",
-            "deadline": "",
-            "rules": [],
-            "prizes": {"first": "$5,000", "second": "$3,000", "third": "$2,000"}
-        }
-    except Exception as e:
-        logging.error(f"Error loading hackathon details: {str(e)}")
-        return {}
-
-def save_hackathon_details(details):
-    try:
-        with open(HACKATHON_DETAILS_FILE, 'w') as f:
-            json.dump(details, f, indent=2)
-        return True
-    except Exception as e:
-        logging.error(f"Error saving hackathon details: {str(e)}")
-        return False
+    if os.path.exists(HACKATHON_DETAILS_FILE):
+        with open(HACKATHON_DETAILS_FILE, 'r') as f:
+            return json.load(f)
+    return {
+        "title": "FALCONS.AI Hack-a-thon",
+        "description": "Join us for an exciting hackathon!",
+        "deadline": "",
+        "rules": [],
+        "prizes": {"first": "$5,000", "second": "$3,000", "third": "$2,000"}
+    }
 
 @app.route('/')
 def index():
@@ -113,7 +122,7 @@ def verify_email():
         else:
             return jsonify({'success': False, 'message': 'Email not found in registered list'}), 400
     except Exception as e:
-        logging.error(f"Error in email verification: {str(e)}")
+        logger.error(f"Error in email verification: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
 
 @app.route('/submit', methods=['POST'])
@@ -165,8 +174,8 @@ def submit():
 
         return jsonify({'success': True, 'message': 'Submission successful!'})
     except Exception as e:
-        logging.error(f"Error in submission: {str(e)}")
-        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+        return handle_error(e, f"Error in submission for email: {request.form.get('email')}")
+
 
 @app.route('/get_deadline')
 def get_deadline():
@@ -174,7 +183,7 @@ def get_deadline():
         details = load_hackathon_details()
         return jsonify({'deadline': details.get('deadline', '')})
     except Exception as e:
-        logging.error(f"Error reading deadline: {str(e)}")
+        logger.error(f"Error reading deadline: {str(e)}")
         return jsonify({'error': 'Could not read deadline'}), 500
 
 @app.route('/submissions')
@@ -183,7 +192,7 @@ def get_submissions():
         submissions = load_submissions()
         return jsonify({'submissions': submissions})
     except Exception as e:
-        logging.error(f"Error loading submissions: {str(e)}")
+        logger.error(f"Error loading submissions: {str(e)}")
         return jsonify({'error': 'Could not load submissions'}), 500
 
 @app.route('/admin/login', methods=['POST'])
@@ -192,14 +201,14 @@ def admin_login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        logging.debug(f"Admin login attempt with email: {email}")
+        logger.debug(f"Admin login attempt with email: {email}")
 
         if verify_admin_credentials(email, password):
             session['admin'] = True
             return jsonify({'success': True})
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     except Exception as e:
-        logging.error(f"Error in admin login: {str(e)}")
+        logger.error(f"Error in admin login: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
 
 @app.route('/admin/update', methods=['POST'])
@@ -208,10 +217,8 @@ def admin_update():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
-        # Load current details
         current_details = load_hackathon_details()
 
-        # Update deadline if provided
         deadline = request.form.get('deadline')
         if deadline:
             try:
@@ -221,7 +228,6 @@ def admin_update():
             except ValueError as e:
                 return jsonify({'success': False, 'message': 'Invalid deadline format'}), 400
 
-        # Update other fields if provided
         if request.form.get('title'):
             current_details['title'] = request.form.get('title')
         if request.form.get('description'):
@@ -229,7 +235,6 @@ def admin_update():
         if request.form.get('rules'):
             current_details['rules'] = request.form.get('rules').split('\n')
 
-        # Update prizes
         prizes = current_details.get('prizes', {})
         if request.form.get('first_prize'):
             prizes['first'] = request.form.get('first_prize')
@@ -239,7 +244,6 @@ def admin_update():
             prizes['third'] = request.form.get('third_prize')
         current_details['prizes'] = prizes
 
-        # Save updated details
         if save_hackathon_details(current_details):
             return jsonify({
                 'success': True, 
@@ -249,7 +253,7 @@ def admin_update():
         return jsonify({'success': False, 'message': 'Failed to save updates'}), 500
 
     except Exception as e:
-        logging.error(f"Error in admin update: {str(e)}")
+        logger.error(f"Error in admin update: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
 
 @app.route('/admin/teams', methods=['GET'])
@@ -261,7 +265,7 @@ def get_teams():
         teams, _ = load_users_and_teams()
         return jsonify({'success': True, 'teams': teams})
     except Exception as e:
-        logging.error(f"Error loading teams: {str(e)}")
+        logger.error(f"Error loading teams: {str(e)}")
         return jsonify({'success': False, 'message': 'Error loading teams'}), 500
 
 @app.route('/admin/teams/add', methods=['POST'])
@@ -285,7 +289,7 @@ def add_team():
 
         return jsonify({'success': True, 'message': 'Team added successfully'})
     except Exception as e:
-        logging.error(f"Error adding team: {str(e)}")
+        logger.error(f"Error adding team: {str(e)}")
         return jsonify({'success': False, 'message': 'Error adding team'}), 500
 
 @app.route('/admin/teams/update', methods=['POST'])
@@ -308,10 +312,8 @@ def update_team():
         if new_team_name in teams:
             return jsonify({'success': False, 'message': 'New team name already exists'}), 400
 
-        # Update team name in teams list
         teams[teams.index(old_team_name)] = new_team_name
 
-        # Update team name in users' assignments
         for user in users:
             if user.get('team') == old_team_name:
                 user['team'] = new_team_name
@@ -320,7 +322,7 @@ def update_team():
 
         return jsonify({'success': True, 'message': 'Team updated successfully'})
     except Exception as e:
-        logging.error(f"Error updating team: {str(e)}")
+        logger.error(f"Error updating team: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating team'}), 500
 
 @app.route('/admin/teams/delete', methods=['POST'])
@@ -341,7 +343,6 @@ def delete_team():
 
         teams.remove(team_name)
 
-        # Remove team assignment from users
         for user in users:
             if user.get('team') == team_name:
                 user['team'] = ''
@@ -350,7 +351,7 @@ def delete_team():
 
         return jsonify({'success': True, 'message': 'Team deleted successfully'})
     except Exception as e:
-        logging.error(f"Error deleting team: {str(e)}")
+        logger.error(f"Error deleting team: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting team'}), 500
 
 @app.route('/admin/emails/add', methods=['POST'])
@@ -378,7 +379,7 @@ def add_email():
 
         return jsonify({'success': True, 'message': 'Email added successfully'})
     except Exception as e:
-        logging.error(f"Error adding email: {str(e)}")
+        logger.error(f"Error adding email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error adding email'}), 500
 
 @app.route('/admin/emails/update', methods=['POST'])
@@ -415,7 +416,7 @@ def update_email():
 
         return jsonify({'success': True, 'message': 'Email updated successfully'})
     except Exception as e:
-        logging.error(f"Error updating email: {str(e)}")
+        logger.error(f"Error updating email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating email'}), 500
 
 @app.route('/admin/emails/update-team', methods=['POST'])
@@ -449,7 +450,7 @@ def update_email_team():
 
         return jsonify({'success': True, 'message': 'Team assignment updated successfully'})
     except Exception as e:
-        logging.error(f"Error updating team assignment: {str(e)}")
+        logger.error(f"Error updating team assignment: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating team assignment'}), 500
 
 
@@ -471,7 +472,7 @@ def delete_email():
 
         return jsonify({'success': True, 'message': 'Email deleted successfully'})
     except Exception as e:
-        logging.error(f"Error deleting email: {str(e)}")
+        logger.error(f"Error deleting email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting email'}), 500
 
 @app.route('/admin/emails')
@@ -483,7 +484,7 @@ def get_registered_emails():
         _, users = load_users_and_teams()
         return jsonify({'success': True, 'emails': users})
     except Exception as e:
-        logging.error(f"Error reading emails: {str(e)}")
+        logger.error(f"Error reading emails: {str(e)}")
         return jsonify({'success': False, 'message': 'Error reading emails'}), 500
 
 @app.route('/winners')
@@ -497,7 +498,7 @@ def get_winners():
             winners.sort(key=lambda x: x['points'], reverse=True)
         return jsonify({'winners': winners})
     except Exception as e:
-        logging.error(f"Error loading winners: {str(e)}")
+        logger.error(f"Error loading winners: {str(e)}")
         return jsonify({'error': 'Could not load winners'}), 500
 
 @app.route('/admin/winners', methods=['GET'])
@@ -511,7 +512,7 @@ def get_admin_winners():
             winners = list(reader)
         return jsonify({'success': True, 'winners': winners})
     except Exception as e:
-        logging.error(f"Error reading winners: {str(e)}")
+        logger.error(f"Error reading winners: {str(e)}")
         return jsonify({'success': False, 'message': 'Error reading winners'}), 500
 
 @app.route('/admin/winners/add', methods=['POST'])
@@ -546,7 +547,7 @@ def add_winner():
 
         return jsonify({'success': True, 'message': 'Winner added successfully'})
     except Exception as e:
-        logging.error(f"Error adding winner: {str(e)}")
+        logger.error(f"Error adding winner: {str(e)}")
         return jsonify({'success': False, 'message': 'Error adding winner'}), 500
 
 @app.route('/admin/winners/update', methods=['POST'])
@@ -589,7 +590,7 @@ def update_winner():
 
         return jsonify({'success': True, 'message': 'Winner updated successfully'})
     except Exception as e:
-        logging.error(f"Error updating winner: {str(e)}")
+        logger.error(f"Error updating winner: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating winner'}), 500
 
 @app.route('/admin/winners/delete', methods=['POST'])
@@ -624,7 +625,7 @@ def delete_winner():
 
         return jsonify({'success': True, 'message': 'Winner deleted successfully'})
     except Exception as e:
-        logging.error(f"Error deleting winner: {str(e)}")
+        logger.error(f"Error deleting winner: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting winner'}), 500
 
 @app.route('/admin/logout')
@@ -638,8 +639,58 @@ def get_hackathon_details():
         details = load_hackathon_details()
         return jsonify(details)
     except Exception as e:
-        logging.error(f"Error getting hackathon details: {str(e)}")
+        logger.error(f"Error getting hackathon details: {str(e)}")
         return jsonify({'error': 'Could not load hackathon details'}), 500
+
+@app.route('/admin/logs/python')
+def get_python_logs():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    try:
+        logs = get_recent_logs('python')
+        return jsonify({'success': True, 'logs': logs})
+    except Exception as e:
+        log_python_error(e, "Error fetching Python logs")
+        return jsonify({'success': False, 'message': 'Error fetching logs'}), 500
+
+@app.route('/admin/logs/javascript')
+def get_javascript_logs():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    try:
+        logs = get_recent_logs('javascript')
+        return jsonify({'success': True, 'logs': logs})
+    except Exception as e:
+        log_python_error(e, "Error fetching JavaScript logs")
+        return jsonify({'success': False, 'message': 'Error fetching logs'}), 500
+
+@app.route('/log/javascript', methods=['POST'])
+def log_javascript_error():
+    try:
+        error_data = request.get_json()
+        if not error_data:
+            return jsonify({'success': False, 'message': 'No error data provided'}), 400
+        log_js_error(error_data)
+        return jsonify({'success': True})
+    except Exception as e:
+        log_python_error(e, "Error logging JavaScript error")
+        return jsonify({'success': False, 'message': 'Error logging JavaScript error'}), 500
+
+def handle_error(e, context=""):
+    log_python_error(e, context)
+    return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
+@safe_file_operation
+def save_hackathon_details(details):
+    try:
+        with open(HACKATHON_DETAILS_FILE, 'w') as f:
+            json.dump(details, f, indent=2)
+        load_hackathon_details.cache_clear()
+        return True
+    except Exception as e:
+        logger.error(f"Error saving hackathon details: {str(e)}")
+        return False
+
 
 if __name__ == '__main__':
     app.run(debug=True)
