@@ -35,6 +35,18 @@
         #hackathonDetailsView .card .card {
             background-color: rgba(33, 37, 41, 0.75);
         }
+
+        /* Add padding for fixed header */
+        .main-content {
+            padding-top: 100px; /* Adjust based on header height */
+            padding-bottom: 80px; /* Account for footer */
+            min-height: calc(100vh - 160px); /* Adjust for header and footer */
+        }
+
+        /* Ensure modals appear below header */
+        .modal {
+            margin-top: 60px; /* Adjust based on header height */
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
