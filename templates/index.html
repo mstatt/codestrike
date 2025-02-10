@@ -49,6 +49,12 @@
                                     <i class="bi bi-shield-lock me-2"></i>Admin
                                 </button>
                             </li>
+                            <!-- Add new menu item in the dropdown menu -->
+                            <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#aboutAppModal">
+                                    <i class="bi bi-info-square me-2"></i>About App
+                                </button>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -79,7 +85,7 @@
                     <div class="card-body">
                         <form id="projectSubmissionForm" class="needs-validation" novalidate>
                             <div class="mb-4">
-                                <label for="email" class="form-label">Team Email</label>
+                                <label for="email" class="form-label">Submitter Email</label>
                                 <div class="input-group">
                                     <input type="email" class="form-control neuromorphic-input" id="email" required>
                                     <span class="input-group-text validation-icon"></span>
@@ -548,6 +554,102 @@
                             <h6 class="mb-3">Contact</h6>
                             <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add new About App Modal -->
+    <div class="modal fade" id="aboutAppModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">About Hackathon Management System</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="about-content">
+                        <h6 class="mb-3">Overview</h6>
+                        <p>
+                            This lightweight hackathon management system is designed specifically for small-scale competitions and organizations. It provides an efficient, user-friendly platform for managing hackathon submissions and participant interactions.
+                        </p>
+
+                        <h6 class="mb-3 mt-4">Key Features</h6>
+                        <div class="features-list mb-4">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>📝 User Registration</strong>
+                                    <p>Simple email-based registration system for participants with team management capabilities.</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>👥 Team Management</strong>
+                                    <p>Create and manage teams, assign participants to specific teams, and track team submissions.</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>⏰ Deadline Management</strong>
+                                    <p>Set and enforce submission deadlines with automatic countdown timer and deadline enforcement.</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>📤 Project Submissions</strong>
+                                    <p>Collect comprehensive project submissions including GitHub repositories, demo videos, and live demo URLs.</p>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>🏆 Winner Management</strong>
+                                    <p>Announce and display winners with customizable point systems and prize distributions.</p>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h6 class="mb-3">Best Practices for Competition Management</h6>
+                        <div class="best-practices mb-4">
+                            <h7 class="mb-2">Before the Competition:</h7>
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item">1. Set up clear rules and requirements</li>
+                                <li class="list-group-item">2. Configure prize structure and judging criteria</li>
+                                <li class="list-group-item">3. Pre-register participant emails</li>
+                                <li class="list-group-item">4. Set realistic submission deadlines</li>
+                            </ul>
+
+                            <h7 class="mb-2">During the Competition:</h7>
+                            <ul class="list-group list-group-flush mb-3">
+                                <li class="list-group-item">1. Monitor team formations and registrations</li>
+                                <li class="list-group-item">2. Track ongoing submissions</li>
+                                <li class="list-group-item">3. Provide support through email</li>
+                                <li class="list-group-item">4. Keep participants updated on deadlines</li>
+                            </ul>
+
+                            <h7 class="mb-2">After the Competition:</h7>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">1. Review all submissions thoroughly</li>
+                                <li class="list-group-item">2. Input winner details and points</li>
+                                <li class="list-group-item">3. Announce results through the platform</li>
+                                <li class="list-group-item">4. Distribute prizes as per schedule</li>
+                            </ul>
+                        </div>
+
+                        <h6 class="mb-3">Technical Specifications</h6>
+                        <div class="tech-specs mb-4">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Storage:</strong> JSON-based data storage for flexibility and simplicity
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Security:</strong> Admin authentication and email verification systems
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Interface:</strong> Responsive design with Bootstrap and custom UI components
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Compatibility:</strong> Works across all modern browsers and devices
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h6 class="mb-3">Support</h6>
+                        <p>
+                            For technical support or questions about the platform, contact: <a href="mailto:support@falcons.ai">support@falcons.ai</a>
+                        </p>
                     </div>
                 </div>
             </div>
