@@ -15,7 +15,7 @@
             <div class="header-content">
                 <div class="d-flex align-items-center">
                     <img src="{{ url_for('static', filename='images/1-Red_Falcon_FAI_scaled.png') }}" alt="FALCONS.AI Logo" class="header-logo">
-                    <h1 class="mb-0 fw-bold h4">FALCONS.AI Hack-a-thon Portal</h1>
+                    <h1 class="mb-0 fw-bold h4">FALCONS.AI Codestrike</h1>
                 </div>
                 <div class="header-buttons">
                     <div id="countdown" class="neuromorphic-countdown me-3"></div>
@@ -430,7 +430,8 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥇 First Place</h5>
-                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
                                         </div>
                                     </div>
                                 </div>
@@ -438,7 +439,8 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥈 Second Place</h5>
-                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
                                         </div>
                                     </div>
                                 </div>
@@ -446,9 +448,23 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥉 Third Place</h5>
-                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="card neuromorphic mb-4">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Prize Information</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">💰 All prizes are paid in USD</li>
+                                        <li class="mb-2">📅 Winners announced within 7 days of hackathon end</li>
+                                        <li class="mb-2">🏦 Payments processed via secure bank transfer</li>
+                                        <li class="mb-2">📝 Winners must complete W-8/W-9 tax forms</li>
+                                        <li>✉️ Payment details will be collected via email</li>
+                                    </ul>
                                 </div>
                             </div>
 
