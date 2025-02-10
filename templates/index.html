@@ -401,8 +401,16 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12">
+                            <!-- Add responsive image container -->
+                            <div class="hackathon-image-container mb-4">
+                                <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
+                                     class="img-fluid rounded w-100" 
+                                     alt="Hackathon Banner"
+                                     style="max-height: 300px; object-fit: contain;">
+                            </div>
+
                             <h6 class="mb-3">About the Event</h6>
-                            <p>Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.</p>
+                            <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.') }}</p>
 
                             <h6 class="mb-3 mt-4">Timeline</h6>
                             <ul class="list-group list-group-flush mb-4">
@@ -422,7 +430,7 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥇 First Place</h5>
-                                            <p class="mb-0">$5,000</p>
+                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -430,7 +438,7 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥈 Second Place</h5>
-                                            <p class="mb-0">$3,000</p>
+                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -438,7 +446,7 @@
                                     <div class="card neuromorphic h-100">
                                         <div class="card-body text-center">
                                             <h5>🥉 Third Place</h5>
-                                            <p class="mb-0">$2,000</p>
+                                            <p class="mb-0">{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -446,11 +454,15 @@
 
                             <h6 class="mb-3">Rules & Requirements</h6>
                             <ul class="list-group list-group-flush mb-4">
-                                <li class="list-group-item">Teams must consist of 1-4 members</li>
-                                <li class="list-group-item">All code must be original and created during the hackathon</li>
-                                <li class="list-group-item">Use of open source libraries and APIs is allowed</li>
-                                <li class="list-group-item">Projects must be submitted before the deadline</li>
-                                <li class="list-group-item">Each team must submit a working demo and documentation</li>
+                                {% for rule in hackathon_details.get('rules', [
+                                    'Teams must consist of 1-4 members',
+                                    'All code must be original and created during the hackathon',
+                                    'Use of open source libraries and APIs is allowed',
+                                    'Projects must be submitted before the deadline',
+                                    'Each team must submit a working demo and documentation'
+                                ]) %}
+                                <li class="list-group-item">{{ rule }}</li>
+                                {% endfor %}
                             </ul>
 
                             <h6 class="mb-3">Contact</h6>
