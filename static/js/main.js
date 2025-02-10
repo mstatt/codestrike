@@ -214,8 +214,9 @@ function handleAdminLogin(event) {
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
-                // Load registered emails
+                // Load registered emails and hackathons
                 loadRegisteredEmails();
+                loadHackathons();
 
                 // Reset form
                 document.getElementById('adminLoginForm').reset();
@@ -400,4 +401,95 @@ function handleAdminUpdate(event) {
 
 function adminLogout() {
     window.location.href = '/admin/logout';
+}
+
+// Add these functions after the existing admin-related functions
+
+function loadHackathons() {
+    fetch('/admin/hackathons')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('hackathonsTableBody');
+            tableBody.innerHTML = '';
+
+            data.hackathons.forEach(hackathon => {
+                const row = document.createElement('tr');
+                const isActive = hackathon.status === 'active';
+                row.innerHTML = `
+                    <td>${hackathon.name}</td>
+                    <td>
+                        <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">
+                            ${hackathon.status}
+                        </span>
+                    </td>
+                    <td>
+                        ${isActive ? 
+                            `<button class="btn btn-sm" onclick="deactivateHackathon('${hackathon.name}')">
+                                <i class="bi bi-pause-fill"></i> Deactivate
+                            </button>` :
+                            `<button class="btn btn-sm" onclick="activateHackathon('${hackathon.name}')">
+                                <i class="bi bi-play-fill"></i> Activate
+                            </button>`
+                        }
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading hackathons:', error);
+            showAlert('Error loading hackathons');
+        });
+}
+
+function activateHackathon(name) {
+    fetch('/admin/hackathons/activate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Hackathon activated successfully', 'success');
+                loadHackathons();
+                location.reload(); // Reload page to update submission form visibility
+            } else {
+                showAlert(data.message || 'Failed to activate hackathon', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while activating hackathon');
+        });
+}
+
+function deactivateHackathon(name) {
+    if (!confirm('Are you sure you want to deactivate this hackathon? This will hide the submission form.')) {
+        return;
+    }
+
+    fetch('/admin/hackathons/deactivate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Hackathon deactivated successfully', 'success');
+                loadHackathons();
+                location.reload(); // Reload page to update submission form visibility
+            } else {
+                showAlert(data.message || 'Failed to deactivate hackathon', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while deactivating hackathon');
+        });
 }

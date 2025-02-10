@@ -1,6 +1,7 @@
 import os
 import json
 import csv
+import shutil
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import logging
@@ -8,32 +9,91 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-app.secret_key = "a_much_stronger_secret_key" # Updated secret key for security
+app.secret_key = "a_much_stronger_secret_key"  # Updated secret key for security
 
+HACKATHONS_DIR = 'hackathons'
 SUBMISSIONS_FILE = 'submissions.json'
 REGISTERED_EMAILS_FILE = 'registered_emails.csv'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 
-# Create admin credentials file with clear text for testing
-with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
-    f.write('admin@hack.com:WhyN0tM3#')
+# Create hackathons directory if it doesn't exist
+os.makedirs(HACKATHONS_DIR, exist_ok=True)
+
+def get_active_hackathon():
+    """Returns the active hackathon directory name or None if no active hackathon exists."""
+    try:
+        for dirname in os.listdir(HACKATHONS_DIR):
+            if dirname.endswith('_active'):
+                return dirname
+        return None
+    except Exception as e:
+        logging.error(f"Error getting active hackathon: {str(e)}")
+        return None
+
+def get_hackathon_path(dirname=None):
+    """Returns the path to the current hackathon directory."""
+    active_dir = dirname or get_active_hackathon()
+    return os.path.join(HACKATHONS_DIR, active_dir) if active_dir else None
+
+def create_hackathon_directory(name):
+    """Creates a new hackathon directory with required files."""
+    dirname = f"{name}_active"
+    dirpath = os.path.join(HACKATHONS_DIR, dirname)
+    os.makedirs(dirpath, exist_ok=True)
+
+    # Create empty submissions file
+    with open(os.path.join(dirpath, SUBMISSIONS_FILE), 'w') as f:
+        json.dump([], f)
+
+    # Create emails file with header
+    with open(os.path.join(dirpath, REGISTERED_EMAILS_FILE), 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['email'])
+
+    return dirname
+
+def archive_hackathon(active_dirname):
+    """Archives the current hackathon by renaming its directory with the end date."""
+    try:
+        old_path = os.path.join(HACKATHONS_DIR, active_dirname)
+        new_name = active_dirname.replace('_active', f"_ended_{datetime.now().strftime('%Y%m%d')}")
+        new_path = os.path.join(HACKATHONS_DIR, new_name)
+        os.rename(old_path, new_path)
+        return True
+    except Exception as e:
+        logging.error(f"Error archiving hackathon: {str(e)}")
+        return False
 
 def load_submissions():
-    if os.path.exists(SUBMISSIONS_FILE):
-        with open(SUBMISSIONS_FILE, 'r') as f:
+    active_dir = get_hackathon_path()
+    if active_dir and os.path.exists(os.path.join(active_dir, SUBMISSIONS_FILE)):
+        with open(os.path.join(active_dir, SUBMISSIONS_FILE), 'r') as f:
             return json.load(f)
     return []
 
 def save_submission(submission):
+    active_dir = get_hackathon_path()
+    if not active_dir:
+        raise Exception("No active hackathon found")
+
     submissions = load_submissions()
     submission['submitted_at'] = datetime.now().isoformat()
     submissions.append(submission)
-    with open(SUBMISSIONS_FILE, 'w') as f:
+
+    with open(os.path.join(active_dir, SUBMISSIONS_FILE), 'w') as f:
         json.dump(submissions, f, indent=2)
 
 def is_registered_email(email):
     try:
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return False
+
+        emails_file = os.path.join(active_dir, REGISTERED_EMAILS_FILE)
+        if not os.path.exists(emails_file):
+            return False
+
+        with open(emails_file, 'r') as f:
             reader = csv.DictReader(f)
             registered_emails = [row['email'].lower() for row in reader]
             return email.lower() in registered_emails
@@ -57,7 +117,8 @@ def verify_admin_credentials(email, password):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    active_hackathon = get_active_hackathon()
+    return render_template('index.html', has_active_hackathon=bool(active_hackathon))
 
 @app.route('/verify_email', methods=['POST'])
 def verify_email():
@@ -77,7 +138,12 @@ def verify_email():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        with open('deadline.txt', 'r') as f:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'success': False, 'message': 'No active hackathon found'}), 400
+
+        deadline_file = os.path.join(active_dir, 'deadline.txt')
+        with open(deadline_file, 'r') as f:
             deadline_str = f.read().strip()
             deadline = datetime.strptime(deadline_str, '%m/%d/%Y, %I:%M:%S %p')
 
@@ -122,7 +188,11 @@ def submit():
 @app.route('/get_deadline')
 def get_deadline():
     try:
-        with open('deadline.txt', 'r') as f:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'error': 'Could not read deadline'}), 500
+        deadline_file = os.path.join(active_dir, 'deadline.txt')
+        with open(deadline_file, 'r') as f:
             deadline = f.read().strip()
         return jsonify({'deadline': deadline})
     except Exception as e:
@@ -160,21 +230,59 @@ def admin_update():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
+        hackathon_name = request.form.get('hackathon_name')
         deadline = request.form.get('deadline')
-        if deadline:
-            with open('deadline.txt', 'w') as f:
-                f.write(deadline)
 
-        new_email = request.form.get('new_email')
-        if new_email:
-            with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([new_email])
+        if not hackathon_name or not deadline:
+            return jsonify({'success': False, 'message': 'Hackathon name and deadline are required'}), 400
 
-        return jsonify({'success': True, 'message': 'Updates successful'})
+        # Check if there's an active hackathon
+        active_hackathon = get_active_hackathon()
+
+        # If there's an active hackathon and it's different from the current one,
+        # archive it and create a new one
+        if active_hackathon and not active_hackathon.startswith(hackathon_name + '_'):
+            archive_hackathon(active_hackathon)
+            create_hackathon_directory(hackathon_name)
+        elif not active_hackathon:
+            create_hackathon_directory(hackathon_name)
+
+        # Update deadline
+        active_dir = get_hackathon_path()
+        with open(os.path.join(active_dir, 'deadline.txt'), 'w') as f:
+            f.write(deadline)
+
+        return jsonify({'success': True, 'message': 'Hackathon updated successfully'})
     except Exception as e:
         logging.error(f"Error in admin update: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
+@app.route('/get_hackathon_status')
+def get_hackathon_status():
+    active_dir = get_active_hackathon()
+    if not active_dir:
+        return jsonify({
+            'active': False,
+            'message': 'No active hackathon'
+        })
+
+    try:
+        deadline_file = os.path.join(get_hackathon_path(), 'deadline.txt')
+        with open(deadline_file, 'r') as f:
+            deadline = f.read().strip()
+
+        name = active_dir.replace('_active', '')
+        return jsonify({
+            'active': True,
+            'name': name,
+            'deadline': deadline
+        })
+    except Exception as e:
+        logging.error(f"Error getting hackathon status: {str(e)}")
+        return jsonify({
+            'active': False,
+            'message': 'Error getting hackathon status'
+        })
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -187,7 +295,12 @@ def get_registered_emails():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'success': True, 'emails': []})
+
+        emails_file = os.path.join(active_dir, REGISTERED_EMAILS_FILE)
+        with open(emails_file, 'r') as f:
             reader = csv.DictReader(f)
             emails = [row['email'] for row in reader]
         return jsonify({'success': True, 'emails': emails})
@@ -201,6 +314,10 @@ def add_email():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'success': False, 'message': 'No active hackathon found'}), 400
+
         data = request.get_json()
         email = data.get('email')
 
@@ -209,7 +326,8 @@ def add_email():
 
         # Read existing emails
         existing_emails = []
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+        emails_file = os.path.join(active_dir, REGISTERED_EMAILS_FILE)
+        with open(emails_file, 'r') as f:
             reader = csv.DictReader(f)
             existing_emails = [row['email'].lower() for row in reader]
 
@@ -217,7 +335,7 @@ def add_email():
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
         # Append new email
-        with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
+        with open(emails_file, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([email])
 
@@ -232,6 +350,10 @@ def update_email():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'success': False, 'message': 'No active hackathon found'}), 400
+
         data = request.get_json()
         old_email = data.get('oldEmail')
         new_email = data.get('newEmail')
@@ -242,7 +364,8 @@ def update_email():
         # Read all emails
         rows = []
         email_updated = False
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+        emails_file = os.path.join(active_dir, REGISTERED_EMAILS_FILE)
+        with open(emails_file, 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row['email'].lower() == old_email.lower():
@@ -255,7 +378,7 @@ def update_email():
             return jsonify({'success': False, 'message': 'Email not found'}), 404
 
         # Write back all emails
-        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+        with open(emails_file, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['email'])
             writer.writeheader()
             writer.writerows(rows)
@@ -271,6 +394,10 @@ def delete_email():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
+        active_dir = get_hackathon_path()
+        if not active_dir:
+            return jsonify({'success': False, 'message': 'No active hackathon found'}), 400
+
         data = request.get_json()
         email = data.get('email')
 
@@ -280,7 +407,8 @@ def delete_email():
         # Read all emails except the one to delete
         rows = []
         email_found = False
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+        emails_file = os.path.join(active_dir, REGISTERED_EMAILS_FILE)
+        with open(emails_file, 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row['email'].lower() != email.lower():
@@ -292,7 +420,7 @@ def delete_email():
             return jsonify({'success': False, 'message': 'Email not found'}), 404
 
         # Write back remaining emails
-        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+        with open(emails_file, 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['email'])
             writer.writeheader()
             writer.writerows(rows)
@@ -301,6 +429,111 @@ def delete_email():
     except Exception as e:
         logging.error(f"Error deleting email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting email'}), 500
+
+# Add these new route handlers after the existing routes
+
+@app.route('/admin/hackathons')
+def get_hackathons():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        hackathons = []
+        active_hackathon = get_active_hackathon()
+
+        for dirname in os.listdir(HACKATHONS_DIR):
+            if dirname.endswith('_active'):
+                name = dirname.replace('_active', '')
+                hackathons.append({
+                    'name': name,
+                    'status': 'active'
+                })
+            elif dirname.endswith('_ended'):
+                name = dirname.split('_ended_')[0]
+                hackathons.append({
+                    'name': name,
+                    'status': 'ended'
+                })
+            elif '_deactivated_' in dirname:
+                name = dirname.split('_deactivated_')[0]
+                hackathons.append({
+                    'name': name,
+                    'status': 'deactivated'
+                })
+
+        return jsonify({'success': True, 'hackathons': hackathons})
+    except Exception as e:
+        logging.error(f"Error getting hackathons: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error getting hackathons'}), 500
+
+@app.route('/admin/hackathons/activate', methods=['POST'])
+def activate_hackathon():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        name = data.get('name')
+
+        if not name:
+            return jsonify({'success': False, 'message': 'Hackathon name is required'}), 400
+
+        # Check if there's already an active hackathon
+        active_hackathon = get_active_hackathon()
+        if active_hackathon:
+            return jsonify({
+                'success': False,
+                'message': 'Another hackathon is already active. Please deactivate it first.'
+            }), 400
+
+        # Find the deactivated hackathon directory
+        deactivated_dirname = None
+        for dirname in os.listdir(HACKATHONS_DIR):
+            if dirname.startswith(name + '_deactivated_'):
+                deactivated_dirname = dirname
+                break
+
+        if not deactivated_dirname:
+            return jsonify({'success': False, 'message': 'Hackathon not found'}), 404
+
+        # Rename the directory to make it active
+        old_path = os.path.join(HACKATHONS_DIR, deactivated_dirname)
+        new_dirname = f"{name}_active"
+        new_path = os.path.join(HACKATHONS_DIR, new_dirname)
+        os.rename(old_path, new_path)
+
+        return jsonify({'success': True, 'message': 'Hackathon activated successfully'})
+    except Exception as e:
+        logging.error(f"Error activating hackathon: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error activating hackathon'}), 500
+
+@app.route('/admin/hackathons/deactivate', methods=['POST'])
+def deactivate_hackathon():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        name = data.get('name')
+
+        if not name:
+            return jsonify({'success': False, 'message': 'Hackathon name is required'}), 400
+
+        # Find the active hackathon directory
+        active_dirname = get_active_hackathon()
+        if not active_dirname or not active_dirname.startswith(name + '_'):
+            return jsonify({'success': False, 'message': 'Hackathon not found or not active'}), 404
+
+        # Rename the directory to deactivated with timestamp
+        old_path = os.path.join(HACKATHONS_DIR, active_dirname)
+        new_dirname = f"{name}_deactivated_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        new_path = os.path.join(HACKATHONS_DIR, new_dirname)
+        os.rename(old_path, new_path)
+
+        return jsonify({'success': True, 'message': 'Hackathon deactivated successfully'})
+    except Exception as e:
+        logging.error(f"Error deactivating hackathon: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error deactivating hackathon'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
