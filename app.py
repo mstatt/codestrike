@@ -119,12 +119,12 @@ def verify_email():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        with open('deadline.txt', 'r') as f:
-            deadline_str = f.read().strip()
+        details = load_hackathon_details()
+        deadline_str = details.get('deadline', '')
+        if deadline_str:
             deadline = datetime.strptime(deadline_str, '%m/%d/%Y, %I:%M:%S %p')
-
-        if datetime.now() > deadline:
-            return jsonify({'success': False, 'message': 'Submission deadline has passed'}), 400
+            if datetime.now() > deadline:
+                return jsonify({'success': False, 'message': 'Submission deadline has passed'}), 400
 
         email = request.form.get('email')
         team_name = request.form.get('team_name')
@@ -171,9 +171,8 @@ def submit():
 @app.route('/get_deadline')
 def get_deadline():
     try:
-        with open('deadline.txt', 'r') as f:
-            deadline = f.read().strip()
-        return jsonify({'deadline': deadline})
+        details = load_hackathon_details()
+        return jsonify({'deadline': details.get('deadline', '')})
     except Exception as e:
         logging.error(f"Error reading deadline: {str(e)}")
         return jsonify({'error': 'Could not read deadline'}), 500

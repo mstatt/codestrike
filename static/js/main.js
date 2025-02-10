@@ -39,17 +39,11 @@ function checkDeadlineForMenuItems() {
 
             // Get menu items
             const winnersButton = document.querySelector('[data-bs-target="#winnersModal"]');
-            const detailsButton = document.querySelector('[data-bs-target="#hackathonDetailsModal"]');
 
-            if (winnersButton && detailsButton) {
+            if (winnersButton) {
                 // Show winners only after deadline
                 if (winnersButton.parentElement) {
                     winnersButton.parentElement.style.display = now > deadline ? 'block' : 'none';
-                }
-
-                // Show details only before deadline
-                if (detailsButton.parentElement) {
-                    detailsButton.parentElement.style.display = now <= deadline ? 'block' : 'none';
                 }
             }
         })
@@ -89,12 +83,65 @@ function updateHackathonDeadlines() {
         });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize countdown timer
-    initializeCountdown();
+function initializeCountdown() {
+    fetch('/get_deadline')
+        .then(response => response.json())
+        .then(data => {
+            const deadline = new Date(data.deadline);
+            const deadlineTime = deadline.getTime();
 
+            // Format the deadline date for display
+            const formattedDeadline = deadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = deadlineTime - now;
+
+                if (distance < 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').innerHTML = "Ended";
+                    document.getElementById('submissionForm').classList.add('d-none');
+
+                    // Show hackathon ended message
+                    const endedMessage = document.getElementById('hackathonEndedMessage');
+                    if (endedMessage) {
+                        endedMessage.classList.remove('d-none');
+                        document.getElementById('endDate').textContent = formattedDeadline;
+                    }
+
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const countdownElement = document.getElementById('countdown');
+                if (countdownElement) {
+                    countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error fetching deadline:', error);
+            showAlert('Error loading deadline information');
+        });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
     // Update hackathon details deadlines
     updateHackathonDeadlines();
+
+    // Initialize countdown timer with current date
+    initializeCountdown();
 
     // Check deadline for menu items visibility
     checkDeadlineForMenuItems();
@@ -229,53 +276,6 @@ function showAlert(message, type = 'danger') {
     }, 5000);
 }
 
-function initializeCountdown() {
-    fetch('/get_deadline')
-        .then(response => response.json())
-        .then(data => {
-            const deadline = new Date(data.deadline);
-            const deadlineTime = deadline.getTime();
-
-            // Format the deadline date for display
-            const formattedDeadline = deadline.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            const timer = setInterval(() => {
-                const now = new Date().getTime();
-                const distance = deadlineTime - now;
-
-                if (distance < 0) {
-                    clearInterval(timer);
-                    document.getElementById('countdown').innerHTML = "Ended";
-                    document.getElementById('submissionForm').classList.add('d-none');
-
-                    // Show hackathon ended message
-                    const endedMessage = document.getElementById('hackathonEndedMessage');
-                    endedMessage.classList.remove('d-none');
-                    document.getElementById('endDate').textContent = formattedDeadline;
-
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                document.getElementById('countdown').innerHTML =
-                    `${days}d ${hours}h ${minutes}m ${seconds}s`;
-            }, 1000);
-        })
-        .catch(error => {
-            console.error('Error fetching deadline:', error);
-            showAlert('Error loading deadline information');
-        });
-}
 
 function handleSubmission(event) {
     event.preventDefault();
