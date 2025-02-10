@@ -211,6 +211,7 @@ body {
     }
 }
 
+
 /* Modal styling */
 .modal-content {
     background: var(--card-bg);
@@ -230,6 +231,23 @@ body {
 .modal-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/*  Alert Styling */
+#alertContainer {
+    position: fixed;
+    top: calc(var(--header-height) + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1060;
+    width: auto;
+    pointer-events: none;
+}
+
+#alertContainer .alert {
+    pointer-events: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
