@@ -303,7 +303,6 @@ function loadSubmissions() {
 }
 
 
-
 function handleAdminLogin(event) {
     event.preventDefault();
 
@@ -482,9 +481,44 @@ function handleAdminUpdate(event) {
 
     const formData = new FormData();
     const newDeadline = document.getElementById('newDeadline').value;
+    const hackathonTitle = document.getElementById('hackathonTitle').value;
+    const hackathonDescription = document.getElementById('hackathonDescription').value;
+    const hackathonRules = document.getElementById('hackathonRules').value;
+    const firstPrize = document.getElementById('firstPrize').value;
+    const secondPrize = document.getElementById('secondPrize').value;
+    const thirdPrize = document.getElementById('thirdPrize').value;
+    const logoFile = document.getElementById('hackathonLogo').files[0];
 
     if (newDeadline) {
         formData.append('deadline', newDeadline);
+    }
+
+    if (hackathonTitle) {
+        formData.append('title', hackathonTitle);
+    }
+
+    if (hackathonDescription) {
+        formData.append('description', hackathonDescription);
+    }
+
+    if (hackathonRules) {
+        formData.append('rules', hackathonRules);
+    }
+
+    if (firstPrize) {
+        formData.append('first_prize', firstPrize);
+    }
+
+    if (secondPrize) {
+        formData.append('second_prize', secondPrize);
+    }
+
+    if (thirdPrize) {
+        formData.append('third_prize', thirdPrize);
+    }
+
+    if (logoFile) {
+        formData.append('logo', logoFile);
     }
 
     fetch('/admin/update', {
@@ -494,9 +528,48 @@ function handleAdminUpdate(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showAlert('Deadline updated successfully', 'success');
+                showAlert('Hackathon details updated successfully', 'success');
                 document.getElementById('adminUpdateForm').reset();
                 initializeCountdown(); // Refresh countdown
+                updateHackathonDeadlines(); // Refresh deadlines
+                checkDeadlineForMenuItems(); // Update menu items visibility
+
+                // Update modal content if it exists
+                const detailsModal = document.getElementById('hackathonDetailsModal');
+                if (detailsModal) {
+                    if (data.details) {
+                        // Update title if provided
+                        if (data.details.title) {
+                            detailsModal.querySelector('.modal-title').textContent = data.details.title;
+                        }
+
+                        // Update description if provided
+                        if (data.details.description) {
+                            detailsModal.querySelector('p').textContent = data.details.description;
+                        }
+
+                        // Update prizes if provided
+                        if (data.details.prizes) {
+                            const prizeDivs = detailsModal.querySelectorAll('.card-body p');
+                            if (prizeDivs.length >= 3) {
+                                prizeDivs[0].textContent = data.details.prizes.first || '$5,000';
+                                prizeDivs[1].textContent = data.details.prizes.second || '$3,000';
+                                prizeDivs[2].textContent = data.details.prizes.third || '$2,000';
+                            }
+                        }
+
+                        // Update rules if provided
+                        if (data.details.rules) {
+                            const rulesList = detailsModal.querySelector('.list-group-flush');
+                            if (rulesList) {
+                                rulesList.innerHTML = data.details.rules
+                                    .split('\n')
+                                    .map(rule => `<li class="list-group-item">${rule}</li>`)
+                                    .join('');
+                            }
+                        }
+                    }
+                }
             } else {
                 showAlert(data.message || 'Update failed', 'danger');
             }
@@ -714,13 +787,15 @@ function loadTeams() {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>
-                            <span class="team-text">${team.team_name}</span>
-                            <input type="text" class="form-control neuromorphic-input d-none" value="${team.team_name}">
+                            <span class="team-text">${team}</span>
+                            <input type="text" class="form-control neuromorphic-input d-none" value="${team}">
                         </td>
-                        <td>${team.email}</td>
                         <td>
                             <button class="btn btn-sm" onclick="editTeam(this)">
                                 <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm" onclick="deleteTeam('${team}')">
+                                <i class="bi bi-trash-fill"></i>
                             </button>
                         </td>
                     `;
@@ -733,6 +808,33 @@ function loadTeams() {
         .catch(error => {
             console.error('Error:', error);
             showAlert('An error occurred while loading teams');
+        });
+}
+
+function deleteTeam(teamName) {
+    if (!confirm('Are you sure you want to delete this team?')) {
+        return;
+    }
+
+    fetch('/admin/teams/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ team_name: teamName })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Team deleted successfully', 'success');
+                loadTeams();
+            } else {
+                showAlert(data.message || 'Failed to delete team', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while deleting team');
         });
 }
 
