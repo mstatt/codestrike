@@ -53,18 +53,13 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
-                                <button class="dropdown-item" id="submitProjectBtn">
-                                    <i class="bi bi-upload me-2"></i>Submit Project
-                                </button>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#hackathonDetailsModal">
-                                    <i class="bi bi-info-circle me-2"></i>Hackathon Details
-                                </button>
-                            </li>
-                            <li>
                                 <button class="dropdown-item" onclick="toggleTheme()">
                                     <i class="bi bi-moon-fill me-2"></i>Toggle Theme
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#submissionFormModal">
+                                    <i class="bi bi-upload me-2"></i>Submit Project
                                 </button>
                             </li>
                             <li>
@@ -171,11 +166,15 @@
             </div>
         </div>
 
-        <!-- Hidden Submission Form -->
-        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0 d-none">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="card neuromorphic">
-                    <div class="card-body">
+        <!-- Convert Submission Form to Modal -->
+        <div class="modal fade" id="submissionFormModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content neuromorphic">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Submit Your Project</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
                         <form id="projectSubmissionForm" class="needs-validation" novalidate>
                             <div class="mb-4">
                                 <label for="email" class="form-label">Submitter Email</label>
@@ -184,7 +183,6 @@
                                     <span class="input-group-text validation-icon"></span>
                                 </div>
                             </div>
-                            <!-- Update submission form to include Project Name -->
                             <div class="mb-4">
                                 <label for="team_name" class="form-label">Team Name</label>
                                 <div class="input-group">
@@ -242,59 +240,61 @@
                 </div>
             </div>
         </div>
-    </main>
 
-    <!-- Preview Submission Modal -->
-    <div class="modal fade" id="previewSubmissionModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content neuromorphic">
-                <div class="modal-header">
-                    <h5 class="modal-title">Preview Submission</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="preview-content">
-                        <h6>Team Information</h6>
-                        <div class="mb-3">
-                            <strong>Team Email:</strong> <span id="previewEmail"></span>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Team Name:</strong> <span id="previewTeamName"></span>
-                        </div>
-                        <h6>Project Details</h6>
-                        <div class="mb-3">
-                            <strong>Project Name:</strong> <span id="previewProjectName"></span>
-                        </div>
-                        <div class="mb-3">
-                            <strong>GitHub Repository:</strong> 
-                            <a id="previewGithub" href="#" target="_blank"></a>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Demo Video:</strong>
-                            <a id="previewVideo" href="#" target="_blank"></a>
-                        </div>
-                        <div class="mb-3">
-                            <strong>Live Demo URL:</strong>
-                            <a id="previewLiveDemo" href="#" target="_blank"></a>
-                        </div>
-                        <div id="previewCredentials" class="mb-3 d-none">
-                            <h6>Demo Credentials</h6>
-                            <div class="mb-2">
-                                <strong>Username:</strong> <span id="previewUsername"></span>
+
+        <!-- Preview Submission Modal -->
+        <div class="modal fade" id="previewSubmissionModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content neuromorphic">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Preview Submission</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="preview-content">
+                            <h6>Team Information</h6>
+                            <div class="mb-3">
+                                <strong>Team Email:</strong> <span id="previewEmail"></span>
                             </div>
-                            <div class="mb-2">
-                                <strong>Password:</strong> <span id="previewPassword"></span>
+                            <div class="mb-3">
+                                <strong>Team Name:</strong> <span id="previewTeamName"></span>
+                            </div>
+                            <h6>Project Details</h6>
+                            <div class="mb-3">
+                                <strong>Project Name:</strong> <span id="previewProjectName"></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>GitHub Repository:</strong> 
+                                <a id="previewGithub" href="#" target="_blank"></a>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Demo Video:</strong>
+                                <a id="previewVideo" href="#" target="_blank"></a>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Live Demo URL:</strong>
+                                <a id="previewLiveDemo" href="#" target="_blank"></a>
+                            </div>
+                            <div id="previewCredentials" class="mb-3 d-none">
+                                <h6>Demo Credentials</h6>
+                                <div class="mb-2">
+                                    <strong>Username:</strong> <span id="previewUsername"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Password:</strong> <span id="previewPassword"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn" data-bs-dismiss="modal">Edit</button>
-                    <button type="button" class="btn btn-primary" onclick="submitFinalProject()">Submit Project</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" data-bs-dismiss="modal">Edit</button>
+                        <button type="button" class="btn btn-primary" onclick="submitFinalProject()">Submit Project</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+    </main>
 
     <footer class="fixed-bottom footer-shadow">
         <div class="container py-3">
@@ -664,7 +664,7 @@
                                     'All code must be original and created during the hackathon',
                                     'Use of open source libraries and APIs is allowed',
                                     'Projects must be submitted before the deadline',
-                                    'Each team must submit a working demo and documentation'
+                                    'Each teammust submit a working demo and documentation'
                                 ]) %}
                                 <li class="list-group-item">{{ rule }}</li>
                                 {% endfor %}
