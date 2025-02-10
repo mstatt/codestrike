@@ -1,0 +1,21 @@
+{
+  "teams": [
+    "Falcons",
+    "Xbox",
+    "Jackson 5"
+  ],
+  "users": [
+    {
+      "email": "john.doe@example.com",
+      "team": "Falcons"
+    },
+    {
+      "email": "jane.smith@example.com",
+      "team": "Xbox"
+    },
+    {
+      "email": "mike@supercess.com",
+      "team": "Jackson 5"
+    }
+  ]
+}

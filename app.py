@@ -11,14 +11,13 @@ app = Flask(__name__)
 app.secret_key = "a_much_stronger_secret_key"
 
 SUBMISSIONS_FILE = 'submissions.json'
-REGISTERED_EMAILS_FILE = 'registered_emails.csv'
+USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
-TEAMS_FILE = 'teams.json'
 
-# Create teams file if it doesn't exist
-if not os.path.exists(TEAMS_FILE):
-    with open(TEAMS_FILE, 'w') as f:
-        json.dump({'teams': []}, f)
+# Create users and teams file if it doesn't exist
+if not os.path.exists(USERS_AND_TEAMS_FILE):
+    with open(USERS_AND_TEAMS_FILE, 'w') as f:
+        json.dump({'teams': [], 'users': []}, f, indent=2)
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -33,23 +32,26 @@ def save_submission(submission):
     with open(SUBMISSIONS_FILE, 'w') as f:
         json.dump(submissions, f, indent=2)
 
-def load_teams():
+def load_users_and_teams():
     try:
-        with open(TEAMS_FILE, 'r') as f:
-            return json.load(f)['teams']
-    except Exception:
-        return []
+        with open(USERS_AND_TEAMS_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get('teams', []), data.get('users', [])
+    except Exception as e:
+        logging.error(f"Error loading users and teams: {str(e)}")
+        return [], []
 
-def save_teams(teams):
-    with open(TEAMS_FILE, 'w') as f:
-        json.dump({'teams': teams}, f, indent=2)
+def save_users_and_teams(teams, users):
+    try:
+        with open(USERS_AND_TEAMS_FILE, 'w') as f:
+            json.dump({'teams': teams, 'users': users}, f, indent=2)
+    except Exception as e:
+        logging.error(f"Error saving users and teams: {str(e)}")
 
 def is_registered_email(email):
     try:
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            registered_emails = [row['email'].lower() for row in reader]
-            return email.lower() in registered_emails
+        teams, users = load_users_and_teams()
+        return any(user['email'].lower() == email.lower() for user in users)
     except Exception as e:
         logging.error(f"Error checking registered emails: {str(e)}")
         return False
@@ -201,7 +203,7 @@ def get_teams():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
-        teams = load_teams()
+        teams, _ = load_users_and_teams()
         return jsonify({'success': True, 'teams': teams})
     except Exception as e:
         logging.error(f"Error loading teams: {str(e)}")
@@ -219,12 +221,12 @@ def add_team():
         if not team_name:
             return jsonify({'success': False, 'message': 'Team name is required'}), 400
 
-        teams = load_teams()
+        teams, users = load_users_and_teams()
         if team_name in teams:
             return jsonify({'success': False, 'message': 'Team already exists'}), 400
 
         teams.append(team_name)
-        save_teams(teams)
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Team added successfully'})
     except Exception as e:
@@ -244,31 +246,22 @@ def update_team():
         if not old_team_name or not new_team_name:
             return jsonify({'success': False, 'message': 'Both old and new team names are required'}), 400
 
-        teams = load_teams()
+        teams, users = load_users_and_teams()
         if old_team_name not in teams:
             return jsonify({'success': False, 'message': 'Team not found'}), 404
 
         if new_team_name in teams:
             return jsonify({'success': False, 'message': 'New team name already exists'}), 400
 
+        # Update team name in teams list
         teams[teams.index(old_team_name)] = new_team_name
-        save_teams(teams)
 
-        try:
-            rows = []
-            with open(REGISTERED_EMAILS_FILE, 'r') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row.get('team') == old_team_name:
-                        row['team'] = new_team_name
-                    rows.append(row)
+        # Update team name in users' assignments
+        for user in users:
+            if user.get('team') == old_team_name:
+                user['team'] = new_team_name
 
-            with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=['email', 'team'])
-                writer.writeheader()
-                writer.writerows(rows)
-        except Exception as e:
-            logging.error(f"Error updating team names in emails: {str(e)}")
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Team updated successfully'})
     except Exception as e:
@@ -287,35 +280,24 @@ def delete_team():
         if not team_name:
             return jsonify({'success': False, 'message': 'Team name is required'}), 400
 
-        teams = load_teams()
+        teams, users = load_users_and_teams()
         if team_name not in teams:
             return jsonify({'success': False, 'message': 'Team not found'}), 404
 
         teams.remove(team_name)
-        save_teams(teams)
 
-        try:
-            rows = []
-            with open(REGISTERED_EMAILS_FILE, 'r') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row.get('team') == team_name:
-                        row['team'] = ''
-                    rows.append(row)
+        # Remove team assignment from users
+        for user in users:
+            if user.get('team') == team_name:
+                user['team'] = ''
 
-            with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=['email', 'team'])
-                writer.writeheader()
-                writer.writerows(rows)
-        except Exception as e:
-            logging.error(f"Error removing team assignments from emails: {str(e)}")
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Team deleted successfully'})
     except Exception as e:
         logging.error(f"Error deleting team: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting team'}), 500
 
-# Update email management to include team assignments
 @app.route('/admin/emails/add', methods=['POST'])
 def add_email():
     if not session.get('admin'):
@@ -329,20 +311,15 @@ def add_email():
         if not email:
             return jsonify({'success': False, 'message': 'Email is required'}), 400
 
-        if team and team not in load_teams():
+        teams, users = load_users_and_teams()
+        if team and team not in teams:
             return jsonify({'success': False, 'message': 'Invalid team'}), 400
 
-        existing_emails = []
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            existing_emails = [row['email'].lower() for row in reader]
-
-        if email.lower() in existing_emails:
+        if any(user['email'].lower() == email.lower() for user in users):
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
-        with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
-            writer.writerow({'email': email, 'team': team})
+        users.append({'email': email, 'team': team})
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Email added successfully'})
     except Exception as e:
@@ -363,32 +340,63 @@ def update_email():
         if not old_email or not new_email:
             return jsonify({'success': False, 'message': 'Both old and new email are required'}), 400
 
-        if team and team not in load_teams():
+        teams, users = load_users_and_teams()
+        if team and team not in teams:
             return jsonify({'success': False, 'message': 'Invalid team'}), 400
 
-        rows = []
-        email_updated = False
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row['email'].lower() == old_email.lower():
-                    rows.append({'email': new_email, 'team': team or row.get('team', '')})
-                    email_updated = True
-                else:
-                    rows.append(row)
+        user_found = False
+        for user in users:
+            if user['email'].lower() == old_email.lower():
+                user['email'] = new_email
+                if team:
+                    user['team'] = team
+                user_found = True
+                break
 
-        if not email_updated:
+        if not user_found:
             return jsonify({'success': False, 'message': 'Email not found'}), 404
 
-        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
-            writer.writeheader()
-            writer.writerows(rows)
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Email updated successfully'})
     except Exception as e:
         logging.error(f"Error updating email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating email'}), 500
+
+@app.route('/admin/emails/update-team', methods=['POST'])
+def update_email_team():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        team = data.get('team', '')
+
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400
+
+        teams, users = load_users_and_teams()
+        if team and team not in teams:
+            return jsonify({'success': False, 'message': 'Invalid team'}), 400
+
+        user_found = False
+        for user in users:
+            if user['email'].lower() == email.lower():
+                user['team'] = team
+                user_found = True
+                break
+
+        if not user_found:
+            return jsonify({'success': False, 'message': 'Email not found'}), 404
+
+        save_users_and_teams(teams, users)
+
+        return jsonify({'success': True, 'message': 'Team assignment updated successfully'})
+    except Exception as e:
+        logging.error(f"Error updating team assignment: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error updating team assignment'}), 500
+
 
 @app.route('/admin/emails/delete', methods=['POST'])
 def delete_email():
@@ -402,28 +410,26 @@ def delete_email():
         if not email:
             return jsonify({'success': False, 'message': 'Email is required'}), 400
 
-        rows = []
-        email_found = False
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row['email'].lower() != email.lower():
-                    rows.append(row)
-                else:
-                    email_found = True
-
-        if not email_found:
-            return jsonify({'success': False, 'message': 'Email not found'}), 404
-
-        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
-            writer.writeheader()
-            writer.writerows(rows)
+        teams, users = load_users_and_teams()
+        users = [user for user in users if user['email'].lower() != email.lower()]
+        save_users_and_teams(teams, users)
 
         return jsonify({'success': True, 'message': 'Email deleted successfully'})
     except Exception as e:
         logging.error(f"Error deleting email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting email'}), 500
+
+@app.route('/admin/emails')
+def get_registered_emails():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        _, users = load_users_and_teams()
+        return jsonify({'success': True, 'emails': users})
+    except Exception as e:
+        logging.error(f"Error reading emails: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error reading emails'}), 500
 
 @app.route('/winners')
 def get_winners():
@@ -569,22 +575,7 @@ def delete_winner():
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin', None)
-    return redirect(url_for('index'))
-
-@app.route('/admin/emails')
-def get_registered_emails():
-    if not session.get('admin'):
-        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
-
-    try:
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            emails = [row['email'] for row in reader]
-        return jsonify({'success': True, 'emails': emails})
-    except Exception as e:
-        logging.error(f"Error reading emails: {str(e)}")
-        return jsonify({'success': False, 'message': 'Error reading emails'}), 500
-
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)

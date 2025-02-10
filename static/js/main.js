@@ -117,6 +117,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addWinnerForm) {
         addWinnerForm.addEventListener('submit', handleAddWinner);
     }
+
+    const adminPanelModal = document.getElementById('adminPanelModal');
+    if (adminPanelModal) {
+        adminPanelModal.addEventListener('hidden.bs.modal', function () {
+            // Re-enable page elements
+            document.body.classList.remove('modal-open');
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+        });
+    }
 });
 
 function validateInput(event) {
@@ -342,30 +354,59 @@ function handleAdminLogin(event) {
 }
 
 function loadRegisteredEmails() {
-    fetch('/admin/emails')
+    // First get the teams to populate dropdowns
+    fetch('/admin/teams')
         .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('emailsTableBody');
-            tableBody.innerHTML = '';
+        .then(teamsData => {
+            if (!teamsData.success) {
+                throw new Error('Failed to load teams');
+            }
 
-            data.emails.forEach(email => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <span class="email-text">${email}</span>
-                        <input type="email" class="form-control neuromorphic-input d-none" value="${email}">
-                    </td>
-                    <td>
-                        <button class="btn btn-sm" onclick="editEmail(this)">
-                            <i class="bi bi-pencil-fill"></i>
-                        </button>
-                        <button class="btn btn-sm" onclick="deleteEmail('${email}')">
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // Now load emails
+            return fetch('/admin/emails').then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('emailsTableBody');
+                    tableBody.innerHTML = '';
+
+                    // Create team options HTML
+                    const teamOptionsHtml = teamsData.teams.map(team =>
+                        `<option value="${team}">${team}</option>`
+                    ).join('');
+
+                    data.emails.forEach(emailData => {
+                        const email = typeof emailData === 'string' ? emailData : emailData.email;
+                        const assignedTeam = typeof emailData === 'string' ? '' : emailData.team;
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <span class="email-text">${email}</span>
+                                <input type="email" class="form-control neuromorphic-input d-none" value="${email}">
+                            </td>
+                            <td>
+                                <select class="form-select neuromorphic-input team-select" onchange="updateEmailTeam('${email}', this.value)">
+                                    <option value="">Select Team</option>
+                                    ${teamOptionsHtml}
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editEmail(this)">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="btn btn-sm" onclick="deleteEmail('${email}')">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+
+                        // Set selected team if exists
+                        if (assignedTeam) {
+                            const select = row.querySelector('.team-select');
+                            select.value = assignedTeam;
+                        }
+                    });
+                });
         })
         .catch(error => {
             console.error('Error loading emails:', error);
@@ -476,6 +517,30 @@ function deleteEmail(email) {
         });
 }
 
+function updateEmailTeam(email, team) {
+    fetch('/admin/emails/update-team', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, team })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Team assignment updated successfully', 'success');
+            } else {
+                showAlert(data.message || 'Failed to update team assignment', 'danger');
+                loadRegisteredEmails(); // Reload to reset state
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while updating team assignment');
+            loadRegisteredEmails(); // Reload to reset state
+        });
+}
+
 function handleAdminUpdate(event) {
     event.preventDefault();
 
@@ -581,7 +646,30 @@ function handleAdminUpdate(event) {
 }
 
 function adminLogout() {
-    window.location.href = '/admin/logout';
+    fetch('/admin/logout')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close admin panel modal
+                const adminPanelModal = bootstrap.Modal.getInstance(document.getElementById('adminPanelModal'));
+                if (adminPanelModal) {
+                    adminPanelModal.hide();
+                }
+
+                // Re-enable page elements
+                document.body.classList.remove('modal-open');
+                const modalBackdrop = document.querySelector('.modal-backdrop');
+                if (modalBackdrop) {
+                    modalBackdrop.remove();
+                }
+
+                showAlert('Logged out successfully', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred during logout');
+        });
 }
 
 function loadAdminWinners() {
@@ -871,7 +959,7 @@ function editTeam(button) {
             .catch(error => {
                 console.error('Error:', error);
                 showAlert('An error occurred while updating team');
-                teamInput.value = oldTeamName;
+                teamInput.value =oldTeamName;
             });
 
         teamText.classList.remove('d-none');
