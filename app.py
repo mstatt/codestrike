@@ -19,9 +19,9 @@ USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 HACKATHON_DETAILS_FILE = 'hackathon_details.json'
 
-# Default admin credentials
+# Update the default admin credentials section
 DEFAULT_ADMIN_EMAIL = 'admin@hack.com'
-DEFAULT_ADMIN_PASSWORD = 'admin123'
+DEFAULT_ADMIN_PASSWORD = 'WhyN0tM3#'
 
 def initialize_admin_credentials():
     """Initialize admin credentials file if it doesn't exist"""
