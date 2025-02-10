@@ -25,6 +25,11 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#hackathonDetailsModal">
+                                    <i class="bi bi-info-circle me-2"></i>Hackathon Details
+                                </button>
+                            </li>
+                            <li>
                                 <button class="dropdown-item" onclick="toggleTheme()">
                                     <i class="bi bi-moon-fill me-2"></i>Toggle Theme
                                 </button>
@@ -268,13 +273,12 @@
                         <!-- User Management Tab -->
                         <div class="tab-pane fade" id="users" role="tabpanel">
                             <div class="mb-4">
-                                <label class="form-label">Teams & Registered Emails</label>
+                                <label class="form-label">Teams Management</label>
                                 <div class="table-responsive">
                                     <table class="table table-dark" id="teamsTable">
                                         <thead>
                                             <tr>
                                                 <th>Team Name</th>
-                                                <th>Email</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -282,6 +286,10 @@
                                             <!-- Teams will be loaded here -->
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="input-group mt-3">
+                                    <input type="text" class="form-control neuromorphic-input" id="newTeamName" placeholder="Add new team">
+                                    <button type="button" class="btn" onclick="addNewTeam()">Add Team</button>
                                 </div>
                             </div>
                             <div class="mb-4">
@@ -291,6 +299,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Email</th>
+                                                <th>Team</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -345,6 +354,78 @@
                     </div>
                     <div class="text-center mt-3">
                         <button type="button" class="btn" onclick="adminLogout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Hackathon Details Modal -->
+    <div class="modal fade" id="hackathonDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">FALCONS.AI Hackathon Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="mb-3">About the Event</h6>
+                            <p>Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.</p>
+
+                            <h6 class="mb-3 mt-4">Timeline</h6>
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Registration Deadline
+                                    <span id="registrationDeadline"></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Project Submission Deadline
+                                    <span id="submissionDeadline"></span>
+                                </li>
+                            </ul>
+
+                            <h6 class="mb-3">Prizes</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥇 First Place</h5>
+                                            <p class="mb-0">$5,000</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥈 Second Place</h5>
+                                            <p class="mb-0">$3,000</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥉 Third Place</h5>
+                                            <p class="mb-0">$2,000</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3">Rules & Requirements</h6>
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item">Teams must consist of 1-4 members</li>
+                                <li class="list-group-item">All code must be original and created during the hackathon</li>
+                                <li class="list-group-item">Use of open source libraries and APIs is allowed</li>
+                                <li class="list-group-item">Projects must be submitted before the deadline</li>
+                                <li class="list-group-item">Each team must submit a working demo and documentation</li>
+                            </ul>
+
+                            <h6 class="mb-3">Contact</h6>
+                            <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
+                        </div>
                     </div>
                 </div>
             </div>

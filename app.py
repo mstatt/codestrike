@@ -8,15 +8,17 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-app.secret_key = "a_much_stronger_secret_key" # Updated secret key for security
+app.secret_key = "a_much_stronger_secret_key"
 
 SUBMISSIONS_FILE = 'submissions.json'
 REGISTERED_EMAILS_FILE = 'registered_emails.csv'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
+TEAMS_FILE = 'teams.json'
 
-# Create admin credentials file with clear text for testing
-with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
-    f.write('admin@hack.com:WhyN0tM3#')
+# Create teams file if it doesn't exist
+if not os.path.exists(TEAMS_FILE):
+    with open(TEAMS_FILE, 'w') as f:
+        json.dump({'teams': []}, f)
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -30,6 +32,17 @@ def save_submission(submission):
     submissions.append(submission)
     with open(SUBMISSIONS_FILE, 'w') as f:
         json.dump(submissions, f, indent=2)
+
+def load_teams():
+    try:
+        with open(TEAMS_FILE, 'r') as f:
+            return json.load(f)['teams']
+    except Exception:
+        return []
+
+def save_teams(teams):
+    with open(TEAMS_FILE, 'w') as f:
+        json.dump({'teams': teams}, f, indent=2)
 
 def is_registered_email(email):
     try:
@@ -86,14 +99,14 @@ def submit():
 
         email = request.form.get('email')
         team_name = request.form.get('team_name')
-        project_name = request.form.get('project_name')  # New field
+        project_name = request.form.get('project_name')  
         github = request.form.get('github')
         video = request.form.get('video')
         live_demo_url = request.form.get('live_demo_url')
         demo_username = request.form.get('demo_username')
         demo_password = request.form.get('demo_password')
 
-        if not all([email, team_name, project_name, github, video, live_demo_url]):  # Added project_name validation
+        if not all([email, team_name, project_name, github, video, live_demo_url]):  
             return jsonify({'success': False, 'message': 'All required fields must be filled'}), 400
 
         if not is_registered_email(email):
@@ -110,7 +123,7 @@ def submit():
         submission = {
             'email': email,
             'team_name': team_name,
-            'project_name': project_name,  # Added project name
+            'project_name': project_name,  
             'github_repo': github,
             'demo_video': video,
             'live_demo_url': live_demo_url,
@@ -169,7 +182,6 @@ def admin_update():
     try:
         deadline = request.form.get('deadline')
         if deadline:
-            # Ensure deadline is properly formatted before writing
             try:
                 parsed_deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
                 formatted_deadline = parsed_deadline.strftime('%m/%d/%Y, %I:%M:%S %p')
@@ -189,12 +201,35 @@ def get_teams():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
-        submissions = load_submissions()
-        teams = [{'team_name': s['team_name'], 'email': s['email']} for s in submissions]
+        teams = load_teams()
         return jsonify({'success': True, 'teams': teams})
     except Exception as e:
         logging.error(f"Error loading teams: {str(e)}")
         return jsonify({'success': False, 'message': 'Error loading teams'}), 500
+
+@app.route('/admin/teams/add', methods=['POST'])
+def add_team():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        team_name = data.get('team_name')
+
+        if not team_name:
+            return jsonify({'success': False, 'message': 'Team name is required'}), 400
+
+        teams = load_teams()
+        if team_name in teams:
+            return jsonify({'success': False, 'message': 'Team already exists'}), 400
+
+        teams.append(team_name)
+        save_teams(teams)
+
+        return jsonify({'success': True, 'message': 'Team added successfully'})
+    except Exception as e:
+        logging.error(f"Error adding team: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error adding team'}), 500
 
 @app.route('/admin/teams/update', methods=['POST'])
 def update_team():
@@ -209,46 +244,78 @@ def update_team():
         if not old_team_name or not new_team_name:
             return jsonify({'success': False, 'message': 'Both old and new team names are required'}), 400
 
-        submissions = load_submissions()
-        team_updated = False
-
-        for submission in submissions:
-            if submission['team_name'] == old_team_name:
-                submission['team_name'] = new_team_name
-                team_updated = True
-                break
-
-        if not team_updated:
+        teams = load_teams()
+        if old_team_name not in teams:
             return jsonify({'success': False, 'message': 'Team not found'}), 404
 
-        with open(SUBMISSIONS_FILE, 'w') as f:
-            json.dump(submissions, f, indent=2)
+        if new_team_name in teams:
+            return jsonify({'success': False, 'message': 'New team name already exists'}), 400
+
+        teams[teams.index(old_team_name)] = new_team_name
+        save_teams(teams)
+
+        try:
+            rows = []
+            with open(REGISTERED_EMAILS_FILE, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row.get('team') == old_team_name:
+                        row['team'] = new_team_name
+                    rows.append(row)
+
+            with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=['email', 'team'])
+                writer.writeheader()
+                writer.writerows(rows)
+        except Exception as e:
+            logging.error(f"Error updating team names in emails: {str(e)}")
 
         return jsonify({'success': True, 'message': 'Team updated successfully'})
     except Exception as e:
         logging.error(f"Error updating team: {str(e)}")
         return jsonify({'success': False, 'message': 'Error updating team'}), 500
 
-
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('admin', None)
-    return redirect(url_for('index'))
-
-@app.route('/admin/emails')
-def get_registered_emails():
+@app.route('/admin/teams/delete', methods=['POST'])
+def delete_team():
     if not session.get('admin'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
-        with open(REGISTERED_EMAILS_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            emails = [row['email'] for row in reader]
-        return jsonify({'success': True, 'emails': emails})
-    except Exception as e:
-        logging.error(f"Error reading emails: {str(e)}")
-        return jsonify({'success': False, 'message': 'Error reading emails'}), 500
+        data = request.get_json()
+        team_name = data.get('team_name')
 
+        if not team_name:
+            return jsonify({'success': False, 'message': 'Team name is required'}), 400
+
+        teams = load_teams()
+        if team_name not in teams:
+            return jsonify({'success': False, 'message': 'Team not found'}), 404
+
+        teams.remove(team_name)
+        save_teams(teams)
+
+        try:
+            rows = []
+            with open(REGISTERED_EMAILS_FILE, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row.get('team') == team_name:
+                        row['team'] = ''
+                    rows.append(row)
+
+            with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=['email', 'team'])
+                writer.writeheader()
+                writer.writerows(rows)
+        except Exception as e:
+            logging.error(f"Error removing team assignments from emails: {str(e)}")
+
+        return jsonify({'success': True, 'message': 'Team deleted successfully'})
+    except Exception as e:
+        logging.error(f"Error deleting team: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error deleting team'}), 500
+
+# Update email management to include team assignments
 @app.route('/admin/emails/add', methods=['POST'])
 def add_email():
     if not session.get('admin'):
@@ -257,11 +324,14 @@ def add_email():
     try:
         data = request.get_json()
         email = data.get('email')
+        team = data.get('team', '')
 
         if not email:
             return jsonify({'success': False, 'message': 'Email is required'}), 400
 
-        # Read existing emails
+        if team and team not in load_teams():
+            return jsonify({'success': False, 'message': 'Invalid team'}), 400
+
         existing_emails = []
         with open(REGISTERED_EMAILS_FILE, 'r') as f:
             reader = csv.DictReader(f)
@@ -270,10 +340,9 @@ def add_email():
         if email.lower() in existing_emails:
             return jsonify({'success': False, 'message': 'Email already exists'}), 400
 
-        # Append new email
         with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow([email])
+            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
+            writer.writerow({'email': email, 'team': team})
 
         return jsonify({'success': True, 'message': 'Email added successfully'})
     except Exception as e:
@@ -287,20 +356,23 @@ def update_email():
 
     try:
         data = request.get_json()
-        old_email = data.get('oldEmail')
-        new_email = data.get('newEmail')
+        old_email = data.get('old_email')
+        new_email = data.get('new_email')
+        team = data.get('team', '')
 
         if not old_email or not new_email:
             return jsonify({'success': False, 'message': 'Both old and new email are required'}), 400
 
-        # Read all emails
+        if team and team not in load_teams():
+            return jsonify({'success': False, 'message': 'Invalid team'}), 400
+
         rows = []
         email_updated = False
         with open(REGISTERED_EMAILS_FILE, 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row['email'].lower() == old_email.lower():
-                    rows.append({'email': new_email})
+                    rows.append({'email': new_email, 'team': team or row.get('team', '')})
                     email_updated = True
                 else:
                     rows.append(row)
@@ -308,9 +380,8 @@ def update_email():
         if not email_updated:
             return jsonify({'success': False, 'message': 'Email not found'}), 404
 
-        # Write back all emails
         with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['email'])
+            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
             writer.writeheader()
             writer.writerows(rows)
 
@@ -331,7 +402,6 @@ def delete_email():
         if not email:
             return jsonify({'success': False, 'message': 'Email is required'}), 400
 
-        # Read all emails except the one to delete
         rows = []
         email_found = False
         with open(REGISTERED_EMAILS_FILE, 'r') as f:
@@ -345,9 +415,8 @@ def delete_email():
         if not email_found:
             return jsonify({'success': False, 'message': 'Email not found'}), 404
 
-        # Write back remaining emails
         with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=['email'])
+            writer = csv.DictWriter(f, fieldnames=['email', 'team'])
             writer.writeheader()
             writer.writerows(rows)
 
@@ -362,7 +431,6 @@ def get_winners():
         with open('winners.csv', 'r') as f:
             reader = csv.DictReader(f)
             winners = list(reader)
-            # Convert points to integer for proper sorting
             for winner in winners:
                 winner['points'] = int(winner['points'])
             winners.sort(key=lambda x: x['points'], reverse=True)
@@ -399,20 +467,17 @@ def add_winner():
         if not all([team_name, project_name, points]):
             return jsonify({'success': False, 'message': 'All fields are required'}), 400
 
-        # Read existing winners
         winners = []
         with open('winners.csv', 'r') as f:
             reader = csv.DictReader(f)
             winners = list(reader)
 
-        # Add new winner
         winners.append({
             'team_name': team_name,
             'project_name': project_name,
             'points': points
         })
 
-        # Write back all winners
         with open('winners.csv', 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
             writer.writeheader()
@@ -438,7 +503,6 @@ def update_winner():
         if not all([old_team_name, team_name, project_name, points]):
             return jsonify({'success': False, 'message': 'All fields are required'}), 400
 
-        # Read existing winners
         winners = []
         winner_updated = False
         with open('winners.csv', 'r') as f:
@@ -457,7 +521,6 @@ def update_winner():
         if not winner_updated:
             return jsonify({'success': False, 'message': 'Winner not found'}), 404
 
-        # Write back all winners
         with open('winners.csv', 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
             writer.writeheader()
@@ -480,7 +543,6 @@ def delete_winner():
         if not team_name:
             return jsonify({'success': False, 'message': 'Team name is required'}), 400
 
-        # Read all winners except the one to delete
         winners = []
         winner_found = False
         with open('winners.csv', 'r') as f:
@@ -494,7 +556,6 @@ def delete_winner():
         if not winner_found:
             return jsonify({'success': False, 'message': 'Winner not found'}), 404
 
-        # Write back remaining winners
         with open('winners.csv', 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
             writer.writeheader()
@@ -504,6 +565,26 @@ def delete_winner():
     except Exception as e:
         logging.error(f"Error deleting winner: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting winner'}), 500
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin', None)
+    return redirect(url_for('index'))
+
+@app.route('/admin/emails')
+def get_registered_emails():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            emails = [row['email'] for row in reader]
+        return jsonify({'success': True, 'emails': emails})
+    except Exception as e:
+        logging.error(f"Error reading emails: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error reading emails'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

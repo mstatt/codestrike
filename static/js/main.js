@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer
     initializeCountdown();
 
+    // Update hackathon details deadlines
+    updateHackathonDeadlines();
+
     // Form validation
     const submissionForm = document.getElementById('projectSubmissionForm');
     const inputs = submissionForm.querySelectorAll('input[required]');
@@ -711,4 +714,34 @@ function editTeam(button) {
         teamInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
     }
+}
+
+function updateHackathonDeadlines() {
+    fetch('/get_deadline')
+        .then(response => response.json())
+        .then(data => {
+            const deadline = new Date(data.deadline);
+            const registrationDeadline = new Date(deadline);
+            registrationDeadline.setDate(deadline.getDate() - 7); // Registration ends 7 days before submission
+
+            document.getElementById('registrationDeadline').textContent = registrationDeadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            document.getElementById('submissionDeadline').textContent = deadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching deadline:', error);
+            showAlert('Error loading deadline information');
+        });
 }
