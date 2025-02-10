@@ -107,6 +107,9 @@
                     <button type="button" class="btn" id="viewSubmissionsBtn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
                         <i class="bi bi-collection me-2"></i>All Submissions
                     </button>
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#winnersModal">
+                        <i class="bi bi-trophy me-2"></i>Winners
+                    </button>
                 </div>
             </div>
             <p class="mb-0 text-muted">Copyright @2025 by FALCONS.AI</p>
@@ -148,6 +151,23 @@
                 <div class="modal-body">
                     <div class="list-group" id="submissionsList">
                         <!-- Submissions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winners Modal -->
+    <div class="modal fade" id="winnersModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Winners List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group" id="winnersList">
+                        <!-- Winners will be loaded here -->
                     </div>
                 </div>
             </div>

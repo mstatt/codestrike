@@ -336,40 +336,7 @@ body {
     color: white;
 }
 
-/* Add these styles for the winners list */
-#winnersList .list-group-item {
-    background: rgba(22, 24, 28, 0.7);
-    border: 1px solid var(--primary-color);
-    transition: transform 0.2s ease;
-}
-
-#winnersList .list-group-item:hover {
-    transform: translateY(-2px);
-}
-
-#winnersList .badge {
-    background-color: var(--primary-color) !important;
-    font-size: 0.9rem;
-    padding: 0.5rem 0.8rem;
-}
-
-#winnersList h5 {
-    color: white;
-    font-size: 1.1rem;
-    margin-bottom: 0.3rem;
-}
-
-#winnersList p {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
-    margin-bottom: 0;
-}
-
-/* Update modal transition for smoother opening/closing */
-.modal.fade .modal-dialog {
-    transition: transform 0.2s ease-out;
-}
-
+/* Styles from edited snippet */
 .submission-buttons-group {
     position: relative;
     overflow: hidden;
@@ -402,4 +369,42 @@ body {
 .btn-group .btn:last-child {
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
+}
+
+.btn-group:hover .btn:not(:first-child) {
+    margin-left: 0;
+}
+
+/* Add these styles for the winners list */
+#winnersList .list-group-item {
+    background: rgba(22, 24, 28, 0.7);
+    border: 1px solid var(--primary-color);
+    transition: transform 0.2s ease;
+}
+
+#winnersList .list-group-item:hover {
+    transform: translateY(-2px);
+}
+
+#winnersList .badge {
+    background-color: var(--primary-color) !important;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+}
+
+#winnersList h5 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+}
+
+#winnersList p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Update modal transition for smoother opening/closing */
+.modal.fade .modal-dialog {
+    transition: transform 0.2s ease-out;
 }
