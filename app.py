@@ -9,11 +9,17 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-app.secret_key = "hackathon_submission_secret_key"
+app.secret_key = "a_much_stronger_secret_key" # Updated secret key for security
 
 SUBMISSIONS_FILE = 'submissions.json'
 REGISTERED_EMAILS_FILE = 'registered_emails.csv'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
+
+# Hash the password and write admin credentials to file if it doesn't exist
+if not os.path.exists(ADMIN_CREDENTIALS_FILE):
+    hashed_password = generate_password_hash('WhyN0tM3#', method='pbkdf2:sha256')
+    with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
+        f.write(f'admin@hack.com:{hashed_password}')
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -42,8 +48,12 @@ def verify_admin_credentials(email, password):
     try:
         with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
             stored_credentials = f.read().strip().split(':')
-            stored_email = stored_credentials[0]
-            stored_password_hash = stored_credentials[1]
+            if len(stored_credentials) != 2:
+                logging.error("Invalid admin credentials format")
+                return False
+            stored_email, stored_password_hash = stored_credentials
+            logging.debug(f"Verifying admin login for email: {email}")
+            logging.debug(f"Stored email: {stored_email}")
             return email == stored_email and check_password_hash(stored_password_hash, password)
     except Exception as e:
         logging.error(f"Error verifying admin credentials: {str(e)}")
