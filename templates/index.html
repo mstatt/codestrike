@@ -49,6 +49,12 @@
                                     <i class="bi bi-shield-lock me-2"></i>Admin
                                 </button>
                             </li>
+                            <!-- Add About button to the menu dropdown -->
+                            <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                                    <i class="bi bi-file-text me-2"></i>About
+                                </button>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -561,6 +567,40 @@
                             <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">About FALCONS.AI Codestrike</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='images/1-Red_Falcon_FAI_scaled.png') }}" 
+                             alt="FALCONS.AI Logo" 
+                             class="img-fluid" 
+                             style="max-width: 200px;">
+                    </div>
+                    <p>Welcome to FALCONS.AI Codestrike - where innovation meets opportunity! This hackathon platform is designed to bring together talented developers, creative thinkers, and problem solvers from around the world.</p>
+
+                    <h6 class="mt-4">What We Offer:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Exciting challenges and projects</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Valuable prizes and recognition</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Networking opportunities</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Professional development</li>
+                    </ul>
+
+                    <p class="mt-4">Join us in shaping the future of technology through innovative solutions and collaborative development.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
