@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     adminLoginForm.addEventListener('submit', handleAdminLogin);
     adminUpdateForm.addEventListener('submit', handleAdminUpdate);
+
+    // Add event listener for winners modal
+    const winnersModal = document.getElementById('winnersModal');
+    if (winnersModal) {
+        winnersModal.addEventListener('show.bs.modal', loadWinners);
+    }
 });
 
 function validateInput(event) {
@@ -209,6 +215,46 @@ function loadSubmissions() {
             showAlert('Error loading submissions');
         });
 }
+
+// Add this to your existing JavaScript file
+
+function loadWinners() {
+    // Simulated winners data (replace with actual API call when implemented)
+    const winners = [
+        { team: "Team Alpha", points: 95, position: 1 },
+        { team: "Data Wizards", points: 88, position: 2 },
+        { team: "Code Ninjas", points: 82, position: 3 },
+        { team: "Binary Bandits", points: 78, position: 4 },
+        { team: "Tech Titans", points: 75, position: 5 }
+    ];
+
+    const winnersList = document.getElementById('winnersList');
+    winnersList.innerHTML = '';
+
+    winners.sort((a, b) => b.points - a.points)
+        .forEach(winner => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item neuromorphic mb-2';
+
+            // Add trophy emoji for top 3
+            let trophyIcon = '';
+            if (winner.position === 1) trophyIcon = '🏆 ';
+            else if (winner.position === 2) trophyIcon = '🥈 ';
+            else if (winner.position === 3) trophyIcon = '🥉 ';
+
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">${trophyIcon}${winner.team}</h5>
+                        <p class="mb-1">Points: ${winner.points}</p>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">#${winner.position}</span>
+                </div>
+            `;
+            winnersList.appendChild(item);
+        });
+}
+
 
 // Add admin-related functions
 function handleAdminLogin(event) {
