@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 256">
+  <style>
+    .brain { fill: #FF0000; }
+    .text { fill: #0000FF; font-family: Arial, sans-serif; }
+  </style>
+  <g class="brain">
+    <path d="M150 50 C180 30 220 30 250 50 C280 70 280 110 250 130 C220 150 180 150 150 130 C120 110 120 70 150 50Z"/>
+    <circle cx="200" cy="90" r="10"/>
+    <line x1="150" y1="90" x2="250" y2="90" stroke="#FF0000" stroke-width="4"/>
+    <text x="190" y="95" class="text" font-size="24">AI</text>
+  </g>
+  <text x="50" y="200" class="text" font-size="36" font-weight="bold">DECODING</text>
+  <text x="50" y="240" class="text" font-size="36" font-weight="bold">DATA SCIENCE</text>
+</svg>

@@ -1,0 +1,86 @@
+:root {
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --background-color: #f0f0f0;
+    --primary-color: #007bff;
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: 'Arial', sans-serif;
+}
+
+.logo {
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 2rem;
+}
+
+.neuromorphic {
+    background: var(--background-color);
+    border-radius: 15px;
+    box-shadow: 8px 8px 15px var(--shadow-color),
+                -8px -8px 15px rgba(255, 255, 255, 0.7);
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.neuromorphic:hover {
+    box-shadow: 10px 10px 20px var(--shadow-color),
+                -10px -10px 20px rgba(255, 255, 255, 0.8);
+}
+
+.neuromorphic-input {
+    background: var(--background-color);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 15px;
+    box-shadow: inset 5px 5px 10px var(--shadow-color),
+                inset -5px -5px 10px rgba(255, 255, 255, 0.7);
+}
+
+.neuromorphic-button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 5px 5px 10px var(--shadow-color),
+                -5px -5px 10px rgba(255, 255, 255, 0.7);
+}
+
+.neuromorphic-button:active {
+    box-shadow: inset 3px 3px 5px var(--shadow-color),
+                inset -3px -3px 5px rgba(255, 255, 255, 0.7);
+}
+
+.neuromorphic-countdown {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 15px;
+    border-radius: 15px;
+    display: inline-block;
+    margin: 1rem 0;
+    box-shadow: 8px 8px 15px var(--shadow-color),
+                -8px -8px 15px rgba(255, 255, 255, 0.7);
+}
+
+footer {
+    margin-top: 3rem;
+    padding: 1rem;
+    color: #666;
+}
+
+.modal-content {
+    border: none;
+}
+
+.list-group-item {
+    background: transparent;
+    border: none;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 10px;
+    box-shadow: inset 3px 3px 5px var(--shadow-color),
+                inset -3px -3px 5px rgba(255, 255, 255, 0.7);
+}
