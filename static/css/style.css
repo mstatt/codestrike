@@ -209,20 +209,21 @@ body {
     animation: slideIn 0.3s ease;
     pointer-events: auto;
     text-align: center;
+    opacity: 0.7; /* Added opacity */
 }
 
 .alert-success {
-    background-color: rgba(25, 135, 84, 0.9) !important;
+    background-color: rgba(25, 135, 84, 0.7) !important;
     color: white !important;
 }
 
 .alert-danger {
-    background-color: rgba(220, 53, 69, 0.9) !important;
+    background-color: rgba(220, 53, 69, 0.7) !important;
     color: white !important;
 }
 
 .alert-warning {
-    background-color: rgba(255, 193, 7, 0.9) !important;
+    background-color: rgba(255, 193, 7, 0.7) !important;
     color: black !important;
 }
 
@@ -237,7 +238,6 @@ body {
     }
 }
 
-/* Modal styling */
 .modal-content {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -257,7 +257,6 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     :root {
         --header-height: 100px;
@@ -292,12 +291,10 @@ body {
     }
 }
 
-/* Adjust form group spacing */
 .mb-4 {
     margin-bottom: 1rem !important;
 }
 
-/* Add these rules after the modal styling section */
 .btn-close {
     filter: invert(15%) sepia(95%) saturate(6932%) hue-rotate(358deg) brightness(95%) contrast(112%) !important;
     opacity: 1 !important;
@@ -307,7 +304,6 @@ body {
     opacity: 0.75 !important;
 }
 
-/* Add these rules after the existing modal styling */
 .table {
     margin-bottom: 0;
     color: white;
