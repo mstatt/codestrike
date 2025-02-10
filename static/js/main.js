@@ -75,15 +75,16 @@ function toggleTheme() {
 }
 
 function updateThemeToggleIcon() {
-    const themeToggle = document.querySelector('.theme-toggle i');
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-
-    if (currentTheme === 'dark') {
-        themeToggle.classList.remove('bi-moon-fill');
-        themeToggle.classList.add('bi-sun-fill');
-    } else {
-        themeToggle.classList.remove('bi-sun-fill');
-        themeToggle.classList.add('bi-moon-fill');
+    const themeToggleButton = document.querySelector('.dropdown-item i.bi[class*="bi-moon"], .dropdown-item i.bi[class*="bi-sun"]');
+    if (themeToggleButton) {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+            themeToggleButton.classList.remove('bi-moon-fill');
+            themeToggleButton.classList.add('bi-sun-fill');
+        } else {
+            themeToggleButton.classList.remove('bi-sun-fill');
+            themeToggleButton.classList.add('bi-moon-fill');
+        }
     }
 }
 
@@ -232,7 +233,6 @@ function loadSubmissions() {
 }
 
 
-
 // Add admin-related functions
 function handleAdminLogin(event) {
     event.preventDefault();
@@ -257,6 +257,7 @@ function handleAdminLogin(event) {
 
                 // Load registered emails
                 loadRegisteredEmails();
+                loadAdminWinners();
 
                 // Reset form
                 document.getElementById('adminLoginForm').reset();
@@ -486,7 +487,6 @@ function loadAdminWinners() {
             showAlert('An error occurred while loading winners');
         });
 }
-
 
 function handleAddWinner(event) {
     event.preventDefault();
