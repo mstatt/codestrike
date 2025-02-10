@@ -125,15 +125,20 @@ body {
 }
 
 .neuromorphic-countdown {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: bold;
     color: var(--primary-color);
-    padding: 15px;
-    border-radius: 15px;
+    padding: 12px 20px;
+    border-radius: 12px;
     display: inline-block;
-    margin: 1rem 0;
-    box-shadow: 8px 8px 15px var(--shadow-color),
-                -8px -8px 15px rgba(255, 255, 255, 0.7);
+    background: var(--background-color);
+    box-shadow: 5px 5px 10px var(--shadow-color),
+                -5px -5px 10px rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .neuromorphic-countdown {
+    box-shadow: 5px 5px 10px var(--shadow-color),
+                -5px -5px 10px rgba(255, 255, 255, 0.1);
 }
 
 .list-group-item {
@@ -179,7 +184,8 @@ body {
     }
 
     .neuromorphic-countdown {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
+        padding: 10px 15px;
     }
 
     .main-content {
