@@ -36,6 +36,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (winnersModal) {
         winnersModal.addEventListener('show.bs.modal', loadWinners);
     }
+
+    // Add event listener for winners tab
+    const winnersTab = document.getElementById('winners-tab');
+    if (winnersTab) {
+        winnersTab.addEventListener('shown.bs.tab', loadAdminWinners);
+    }
+
+    const addWinnerForm = document.getElementById('addWinnerForm');
+    if (addWinnerForm) {
+        addWinnerForm.addEventListener('submit', handleAddWinner);
+    }
 });
 
 function validateInput(event) {
@@ -464,4 +475,160 @@ function handleAdminUpdate(event) {
 
 function adminLogout() {
     window.location.href = '/admin/logout';
+}
+
+function loadAdminWinners() {
+    fetch('/admin/winners')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const tableBody = document.getElementById('winnersTableBody');
+                tableBody.innerHTML = '';
+
+                data.winners.forEach(winner => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <span class="winner-text">${winner.team_name}</span>
+                            <input type="text" class="form-control neuromorphic-input d-none" value="${winner.team_name}">
+                        </td>
+                        <td>
+                            <span class="winner-text">${winner.project_name}</span>
+                            <input type="text" class="form-control neuromorphic-input d-none" value="${winner.project_name}">
+                        </td>
+                        <td>
+                            <span class="winner-text">${winner.points}</span>
+                            <input type="number" class="form-control neuromorphic-input d-none" value="${winner.points}">
+                        </td>
+                        <td>
+                            <button class="btn btn-sm" onclick="editWinner(this)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-sm" onclick="deleteWinner('${winner.team_name}')">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                showAlert(data.message || 'Failed to load winners', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while loading winners');
+        });
+}
+
+
+function handleAddWinner(event) {
+    event.preventDefault();
+
+    const teamName = document.getElementById('newTeamName').value;
+    const projectName = document.getElementById('newProjectName').value;
+    const points = document.getElementById('newPoints').value;
+
+    fetch('/admin/winners/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            team_name: teamName,
+            project_name: projectName,
+            points: points
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Winner added successfully', 'success');
+                document.getElementById('addWinnerForm').reset();
+                loadAdminWinners();
+            } else {
+                showAlert(data.message || 'Failed to add winner', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while adding winner');
+        });
+}
+
+function editWinner(button) {
+    const row = button.closest('tr');
+    const texts = row.querySelectorAll('.winner-text');
+    const inputs = row.querySelectorAll('input');
+
+    if (texts[0].classList.contains('d-none')) {
+        // Save changes
+        const teamName = inputs[0].value;
+        const projectName = inputs[1].value;
+        const points = inputs[2].value;
+        const oldTeamName = texts[0].textContent;
+
+        fetch('/admin/winners/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                old_team_name: oldTeamName,
+                team_name: teamName,
+                project_name: projectName,
+                points: points
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    texts.forEach((text, index) => {
+                        text.textContent = inputs[index].value;
+                        text.classList.remove('d-none');
+                    });
+                    inputs.forEach(input => input.classList.add('d-none'));
+                    button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
+                    showAlert('Winner updated successfully', 'success');
+                } else {
+                    showAlert(data.message || 'Failed to update winner', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating winner');
+            });
+    } else {
+        // Show edit inputs
+        texts.forEach(text => text.classList.add('d-none'));
+        inputs.forEach(input => input.classList.remove('d-none'));
+        button.innerHTML = '<i class="bi bi-check-lg"></i>';
+    }
+}
+
+function deleteWinner(teamName) {
+    if (!confirm('Are you sure you want to delete this winner?')) {
+        return;
+    }
+
+    fetch('/admin/winners/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ team_name: teamName })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Winner deleted successfully', 'success');
+                loadAdminWinners();
+            } else {
+                showAlert(data.message || 'Failed to delete winner', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while deleting winner');
+        });
 }

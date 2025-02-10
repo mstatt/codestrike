@@ -322,5 +322,139 @@ def get_winners():
         logging.error(f"Error loading winners: {str(e)}")
         return jsonify({'error': 'Could not load winners'}), 500
 
+@app.route('/admin/winners', methods=['GET'])
+def get_admin_winners():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        with open('winners.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            winners = list(reader)
+        return jsonify({'success': True, 'winners': winners})
+    except Exception as e:
+        logging.error(f"Error reading winners: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error reading winners'}), 500
+
+@app.route('/admin/winners/add', methods=['POST'])
+def add_winner():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        team_name = data.get('team_name')
+        project_name = data.get('project_name')
+        points = data.get('points')
+
+        if not all([team_name, project_name, points]):
+            return jsonify({'success': False, 'message': 'All fields are required'}), 400
+
+        # Read existing winners
+        winners = []
+        with open('winners.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            winners = list(reader)
+
+        # Add new winner
+        winners.append({
+            'team_name': team_name,
+            'project_name': project_name,
+            'points': points
+        })
+
+        # Write back all winners
+        with open('winners.csv', 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
+            writer.writeheader()
+            writer.writerows(winners)
+
+        return jsonify({'success': True, 'message': 'Winner added successfully'})
+    except Exception as e:
+        logging.error(f"Error adding winner: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error adding winner'}), 500
+
+@app.route('/admin/winners/update', methods=['POST'])
+def update_winner():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        old_team_name = data.get('old_team_name')
+        team_name = data.get('team_name')
+        project_name = data.get('project_name')
+        points = data.get('points')
+
+        if not all([old_team_name, team_name, project_name, points]):
+            return jsonify({'success': False, 'message': 'All fields are required'}), 400
+
+        # Read existing winners
+        winners = []
+        winner_updated = False
+        with open('winners.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['team_name'] == old_team_name:
+                    winners.append({
+                        'team_name': team_name,
+                        'project_name': project_name,
+                        'points': points
+                    })
+                    winner_updated = True
+                else:
+                    winners.append(row)
+
+        if not winner_updated:
+            return jsonify({'success': False, 'message': 'Winner not found'}), 404
+
+        # Write back all winners
+        with open('winners.csv', 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
+            writer.writeheader()
+            writer.writerows(winners)
+
+        return jsonify({'success': True, 'message': 'Winner updated successfully'})
+    except Exception as e:
+        logging.error(f"Error updating winner: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error updating winner'}), 500
+
+@app.route('/admin/winners/delete', methods=['POST'])
+def delete_winner():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        team_name = data.get('team_name')
+
+        if not team_name:
+            return jsonify({'success': False, 'message': 'Team name is required'}), 400
+
+        # Read all winners except the one to delete
+        winners = []
+        winner_found = False
+        with open('winners.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['team_name'] != team_name:
+                    winners.append(row)
+                else:
+                    winner_found = True
+
+        if not winner_found:
+            return jsonify({'success': False, 'message': 'Winner not found'}), 404
+
+        # Write back remaining winners
+        with open('winners.csv', 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['team_name', 'project_name', 'points'])
+            writer.writeheader()
+            writer.writerows(winners)
+
+        return jsonify({'success': True, 'message': 'Winner deleted successfully'})
+    except Exception as e:
+        logging.error(f"Error deleting winner: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error deleting winner'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
