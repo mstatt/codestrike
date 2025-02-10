@@ -5,7 +5,6 @@ from datetime import datetime
 from functools import lru_cache
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import logging
-from werkzeug.security import generate_password_hash, check_password_hash
 from logger_config import log_python_error, log_js_error, get_recent_logs
 
 logging.basicConfig(level=logging.DEBUG)
@@ -27,12 +26,27 @@ def initialize_admin_credentials():
     """Initialize admin credentials file if it doesn't exist"""
     try:
         if not os.path.exists(ADMIN_CREDENTIALS_FILE):
-            password_hash = generate_password_hash(DEFAULT_ADMIN_PASSWORD)
             with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
-                f.write(f"{DEFAULT_ADMIN_EMAIL}:{password_hash}")
+                f.write(f"{DEFAULT_ADMIN_EMAIL}:{DEFAULT_ADMIN_PASSWORD}")
             logger.info("Admin credentials file created with default credentials")
+        else:
+            # Verify file format and recreate if invalid
+            with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
+                content = f.read().strip()
+                if not content or ':' not in content:
+                    logger.warning("Invalid admin credentials file format, recreating file")
+                    with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
+                        f.write(f"{DEFAULT_ADMIN_EMAIL}:{DEFAULT_ADMIN_PASSWORD}")
+                    logger.info("Admin credentials file recreated with default credentials")
     except Exception as e:
         logger.error(f"Error initializing admin credentials: {str(e)}")
+        # Attempt to recreate the file
+        try:
+            with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
+                f.write(f"{DEFAULT_ADMIN_EMAIL}:{DEFAULT_ADMIN_PASSWORD}")
+            logger.info("Admin credentials file recreated after error")
+        except Exception as inner_e:
+            logger.error(f"Failed to recreate admin credentials file: {str(inner_e)}")
 
 # Initialize admin credentials on startup
 initialize_admin_credentials()
@@ -59,32 +73,31 @@ def safe_file_operation(func):
 
 @safe_file_operation
 def verify_admin_credentials(email, password):
-    """Verify admin credentials with proper error handling"""
+    """Verify admin credentials with clear text password"""
     try:
-        # First ensure the credentials file exists
+        # First check if file exists and is valid
         if not os.path.exists(ADMIN_CREDENTIALS_FILE):
             logger.warning("Admin credentials file not found, creating with default credentials")
             initialize_admin_credentials()
+            return False
 
         # Read and verify credentials
         with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
             content = f.read().strip()
-            logger.debug(f"Reading admin credentials file: {len(content)} characters")
-
-            if not content:
-                logger.error("Admin credentials file is empty")
+            if not content or ':' not in content:
+                logger.error("Invalid admin credentials file format")
+                initialize_admin_credentials()
                 return False
 
-            stored_credentials = content.split(':')
-            if len(stored_credentials) != 2:
-                logger.error(f"Invalid credential format in file: found {len(stored_credentials)} parts")
-                return False
-
-            stored_email, stored_password_hash = stored_credentials
-            logger.info(f"Verifying login attempt for email: {email}")
+            stored_email, stored_password = content.split(':', 1)
+            logger.debug(f"Attempting login for email: {email}")
 
             # Verify credentials
-            is_valid = email == stored_email and check_password_hash(stored_password_hash, password)
+            if email != stored_email:
+                logger.warning(f"Login attempt with unknown email: {email}")
+                return False
+
+            is_valid = password == stored_password
             if not is_valid:
                 logger.warning(f"Failed login attempt for email: {email}")
             else:
