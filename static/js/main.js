@@ -1,3 +1,95 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const submitProjectBtn = document.getElementById('submitProjectBtn');
+    const submissionForm = document.getElementById('submissionForm');
+    const hackathonDetailsView = document.getElementById('hackathonDetailsView');
+
+    if (submitProjectBtn) {
+        submitProjectBtn.addEventListener('click', function() {
+            if (submissionForm && hackathonDetailsView) {
+                submissionForm.classList.toggle('d-none');
+                hackathonDetailsView.classList.toggle('d-none');
+            }
+        });
+    }
+
+    // Initialize the page
+    updateHackathonDeadlines();
+    initializeCountdown();
+    checkDeadlineForMenuItems();
+
+    // Form validation
+    const projectSubmissionForm = document.getElementById('projectSubmissionForm');
+    if (projectSubmissionForm) {
+        const inputs = projectSubmissionForm.querySelectorAll('input[required]');
+        inputs.forEach(input => {
+            input.addEventListener('input', validateInput);
+            input.addEventListener('blur', validateInput);
+        });
+        projectSubmissionForm.addEventListener('submit', handleSubmission);
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggleIcon();
+
+    // Load submissions if the element exists
+    const submissionsList = document.getElementById('submissionsList');
+    if (submissionsList) {
+        loadSubmissions();
+    }
+
+    // Add admin-related event listeners
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', handleAdminLogin);
+    }
+
+    const adminUpdateForm = document.getElementById('adminUpdateForm');
+    if (adminUpdateForm) {
+        adminUpdateForm.addEventListener('submit', handleAdminUpdate);
+    }
+
+    // Add event listener for winners modal
+    const winnersModal = document.getElementById('winnersModal');
+    if (winnersModal) {
+        winnersModal.addEventListener('show.bs.modal', loadWinners);
+    }
+
+    // Add event listener for admin panel modal
+    const adminPanelModal = document.getElementById('adminPanelModal');
+    if (adminPanelModal) {
+        adminPanelModal.addEventListener('show.bs.modal', function () {
+            // Load current hackathon details into form fields
+            updateHackathonDeadlines();
+            // Load other admin data
+            loadRegisteredEmails();
+            loadTeams();
+            loadAdminWinners();
+        });
+
+        adminPanelModal.addEventListener('hidden.bs.modal', function () {
+            // Re-enable page elements
+            document.body.classList.remove('modal-open');
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+        });
+    }
+
+    // Add event listener for winners tab
+    const winnersTab = document.getElementById('winners-tab');
+    if (winnersTab) {
+        winnersTab.addEventListener('shown.bs.tab', loadAdminWinners);
+    }
+
+    const addWinnerForm = document.getElementById('addWinnerForm');
+    if (addWinnerForm) {
+        addWinnerForm.addEventListener('submit', handleAddWinner);
+    }
+});
+
 function addNewTeam() {
     const teamNameInput = document.getElementById('newTeamName');
     if (!teamNameInput) {
@@ -942,7 +1034,7 @@ function loadWinners() {
                             <p class="mb-1">${winner.project_name}</p>
                             <p class="mb-1">Points: ${winner.points}</p>
                         </div>
-                        <<span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
                 `;
                 winnersList.appendChild(item);
@@ -1144,6 +1236,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const addWinnerForm = document.getElementById('addWinnerForm');
     if (addWinnerForm) {
         addWinnerForm.addEventListener('submit', handleAddWinner);
+    }
+
+    const submitProjectBtn = document.getElementById('submitProjectBtn');
+    const submissionForm = document.getElementById('submissionForm');
+    const hackathonDetailsView = document.getElementById('hackathonDetailsView');
+
+    if (submitProjectBtn) {
+        submitProjectBtn.addEventListener('click', function() {
+            if (submissionForm && hackathonDetailsView) {
+                submissionForm.classList.toggle('d-none');
+                hackathonDetailsView.classList.toggle('d-none');
+            }
+        });
     }
 });
 
@@ -1814,8 +1919,7 @@ function loadTeams() {
                             </button>
                             <button class="btn btn-sm" onclick="deleteTeam('${team}')">
                                 <i class="bi bi-trash-fill"></i>
-                            </button>
-                        </td>
+                            </button>                        </td>
                     `;
                     tableBody.appendChild(row);
                 });

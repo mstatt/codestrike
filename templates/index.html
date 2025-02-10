@@ -25,6 +25,11 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
+                                <button class="dropdown-item" id="submitProjectBtn">
+                                    <i class="bi bi-upload me-2"></i>Submit Project
+                                </button>
+                            </li>
+                            <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#hackathonDetailsModal">
                                     <i class="bi bi-info-circle me-2"></i>Hackathon Details
                                 </button>
@@ -49,7 +54,6 @@
                                     <i class="bi bi-shield-lock me-2"></i>Admin
                                 </button>
                             </li>
-                            <!-- Add new menu item in the dropdown menu -->
                             <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#aboutAppModal">
                                     <i class="bi bi-info-square me-2"></i>About App
@@ -65,21 +69,82 @@
     <main class="flex-grow-1 container main-content">
         <div id="alertContainer"></div>
 
-        <!-- Hackathon Ended Message -->
-        <div id="hackathonEndedMessage" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0 d-none">
-            <div class="col-12 col-md-8 col-lg-6">
+        <!-- Hackathon Details as Default View -->
+        <div id="hackathonDetailsView" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
+            <div class="col-12 col-lg-10">
                 <div class="card neuromorphic">
-                    <div class="card-body text-center">
-                        <h2 class="mb-4">Hackathon Ended</h2>
-                        <p class="mb-3">The last hackathon ended on <span id="endDate"></span>.</p>
-                        <p>Please keep checking back for our next event!</p>
+                    <div class="card-body">
+                        <div class="hackathon-image-container mb-4">
+                            <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
+                                 class="img-fluid rounded w-100" 
+                                 alt="Hackathon Banner"
+                                 style="max-height: 300px; object-fit: contain;">
+                        </div>
+
+                        <h4 class="mb-4">{{ hackathon_details.get('title', 'FALCONS.AI Hack-a-thon') }}</h4>
+
+                        <h6 class="mb-3">About the Event</h6>
+                        <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Codestrike brings together creative minds to build groundbreaking solutions.') }}</p>
+
+                        <div class="card neuromorphic mb-4">
+                            <div class="card-body">
+                                <div class="deadline-info">
+                                    <h5 class="text-center mb-4">Project Submission Deadline</h5>
+                                    <p class="text-center deadline-display h4 mb-3"></p>
+                                    <p class="text-center text-muted small">
+                                        All project submissions must be completed before this deadline
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3">Prizes</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card neuromorphic h-100">
+                                    <div class="card-body text-center">
+                                        <h5>🥇 First Place</h5>
+                                        <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card neuromorphic h-100">
+                                    <div class="card-body text-center">
+                                        <h5>🥈 Second Place</h5>
+                                        <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card neuromorphic h-100">
+                                    <div class="card-body text-center">
+                                        <h5>🥉 Third Place</h5>
+                                        <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-3">Rules & Requirements</h6>
+                        <ul class="list-group list-group-flush mb-4">
+                            {% for rule in hackathon_details.get('rules', [
+                                'Teams must consist of 1-4 members',
+                                'All code must be original and created during the hackathon',
+                                'Use of open source libraries and APIs is allowed',
+                                'Projects must be submitted before the deadline',
+                                'Each team must submit a working demo and documentation'
+                            ]) %}
+                            <li class="list-group-item">{{ rule }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Submission Form -->
-        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
+        <!-- Hidden Submission Form -->
+        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0 d-none">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
@@ -603,7 +668,7 @@
 
                         <h6 class="mb-3">Best Practices for Competition Management</h6>
                         <div class="best-practices mb-4">
-                            <h7 class="mb-2">Before the Competition:</h7>
+                            <h7 class="mb-22">Before the Competition:</h7>
                             <ul class="list-group list-group-flush mb-3">
                                 <li class="list-group-item">1. Set up clear rules and requirements</li>
                                 <li class="list-group-item">2. Configure prize structure and judging criteria</li>
