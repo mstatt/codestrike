@@ -369,3 +369,37 @@ body {
 .modal.fade .modal-dialog {
     transition: transform 0.2s ease-out;
 }
+
+.submission-buttons-group {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-group {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.btn-group .btn:not(:first-child) {
+    margin-left: -1px;
+}
+
+.btn-group .btn {
+    position: relative;
+    border-radius: 9999px !important;
+    z-index: 1;
+}
+
+.btn-group .btn:hover {
+    z-index: 2;
+}
+
+.btn-group .btn:first-child {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.btn-group .btn:last-child {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
