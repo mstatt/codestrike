@@ -220,7 +220,7 @@ body {
 }
 
 .modal-content.neuromorphic {
-    background: rgba(22, 24, 28, 0.7);
+    background: rgb(22, 24, 28);
 }
 
 .modal-header {
