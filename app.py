@@ -76,3 +76,12 @@ def get_deadline():
     except Exception as e:
         logging.error(f"Error reading deadline: {str(e)}")
         return jsonify({'error': 'Could not read deadline'}), 500
+
+@app.route('/submissions')
+def get_submissions():
+    try:
+        submissions = load_submissions()
+        return jsonify({'submissions': submissions})
+    except Exception as e:
+        logging.error(f"Error loading submissions: {str(e)}")
+        return jsonify({'error': 'Could not load submissions'}), 500

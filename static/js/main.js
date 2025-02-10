@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon();
+
+    // Load submissions after the page loads
+    loadSubmissions();
 });
 
 function validateInput(event) {
@@ -89,7 +92,7 @@ function initializeCountdown() {
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                document.getElementById('countdown').innerHTML = 
+                document.getElementById('countdown').innerHTML =
                     `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
                 if (distance < 0) {
@@ -117,22 +120,53 @@ function handleSubmission(event) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert(data.message, 'success');
-            document.getElementById('submissionForm').reset();
-            // Reset validation icons
-            document.querySelectorAll('.validation-icon').forEach(icon => {
-                icon.innerHTML = '';
-                icon.classList.remove('valid', 'invalid');
-            });
-        } else {
-            showAlert(data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('An error occurred while submitting the form');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+                document.getElementById('submissionForm').reset();
+                // Reset validation icons
+                document.querySelectorAll('.validation-icon').forEach(icon => {
+                    icon.innerHTML = '';
+                    icon.classList.remove('valid', 'invalid');
+                });
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while submitting the form');
+        });
+}
+
+function loadSubmissions() {
+    fetch('/submissions')
+        .then(response => response.json())
+        .then(data => {
+            const submissionsList = document.getElementById('submissionsList');
+            submissionsList.innerHTML = '';
+
+            data.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+                .forEach(submission => {
+                    const submissionDate = new Date(submission.submitted_at).toLocaleString();
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item neuromorphic mb-2';
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Email:</strong> ${submission.email}<br>
+                                <strong>GitHub:</strong> <a href="${submission.github_repo}" target="_blank">${submission.github_repo}</a><br>
+                                <strong>Demo:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a>
+                            </div>
+                            <small class="text-muted">${submissionDate}</small>
+                        </div>
+                    `;
+                    submissionsList.appendChild(item);
+                });
+        })
+        .catch(error => {
+            console.error('Error loading submissions:', error);
+            showAlert('Error loading submissions');
+        });
 }

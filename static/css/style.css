@@ -120,6 +120,13 @@ body {
                 inset -3px -3px 5px rgba(255, 255, 255, 0.7) !important;
 }
 
+.btn:hover {
+    color: var(--primary-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 12px var(--shadow-color),
+                -6px -6px 12px rgba(255, 255, 255, 0.7) !important;
+}
+
 .neuromorphic-countdown {
     font-size: 1rem;
     font-weight: bold;
