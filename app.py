@@ -1,5 +1,6 @@
 import os
 import json
+import csv
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 import logging
@@ -10,6 +11,7 @@ app = Flask(__name__)
 app.secret_key = "hackathon_submission_secret_key"
 
 SUBMISSIONS_FILE = 'submissions.json'
+REGISTERED_EMAILS_FILE = 'registered_emails.csv'
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -24,9 +26,34 @@ def save_submission(submission):
     with open(SUBMISSIONS_FILE, 'w') as f:
         json.dump(submissions, f, indent=2)
 
+def is_registered_email(email):
+    try:
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            registered_emails = [row['email'].lower() for row in reader]
+            return email.lower() in registered_emails
+    except Exception as e:
+        logging.error(f"Error checking registered emails: {str(e)}")
+        return False
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/verify_email', methods=['POST'])
+def verify_email():
+    try:
+        email = request.form.get('email')
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400
+
+        if is_registered_email(email):
+            return jsonify({'success': True, 'message': 'Email verified successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Email not found in registered list'}), 400
+    except Exception as e:
+        logging.error(f"Error in email verification: {str(e)}")
+        return jsonify({'success': False, 'message': 'An error occurred'}), 500
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -42,6 +69,12 @@ def submit():
         email = request.form.get('email')
         github = request.form.get('github')
         video = request.form.get('video')
+        live_demo_url = request.form.get('live_demo_url')
+        demo_username = request.form.get('demo_username')
+        demo_password = request.form.get('demo_password')
+
+        if not is_registered_email(email):
+            return jsonify({'success': False, 'message': 'Email not registered for the hackathon'}), 400
 
         # Load existing submissions
         submissions = load_submissions()
@@ -58,7 +91,12 @@ def submit():
         submission = {
             'email': email,
             'github_repo': github,
-            'demo_video': video
+            'demo_video': video,
+            'live_demo_url': live_demo_url,
+            'demo_credentials': {
+                'username': demo_username,
+                'password': demo_password
+            } if demo_username and demo_password else None
         }
         save_submission(submission)
 

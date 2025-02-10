@@ -73,6 +73,13 @@ body {
     transform: translateY(-50%);
 }
 
+.view-submissions-btn {
+    position: absolute;
+    right: 5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .neuromorphic {
     background: var(--background-color);
     border-radius: 15px;
@@ -197,6 +204,10 @@ body {
     h1 {
         font-size: 1.5rem;
     }
+
+    .view-submissions-btn {
+        right: 4rem;
+    }
 }
 
 @media (max-width: 576px) {
@@ -211,6 +222,13 @@ body {
 
     .btn {
         width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .theme-toggle,
+    .view-submissions-btn {
+        position: static;
+        transform: none;
         margin-bottom: 0.5rem;
     }
 }

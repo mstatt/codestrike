@@ -3,15 +3,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCountdown();
 
     // Form validation
-    const form = document.getElementById('submissionForm');
-    const inputs = form.querySelectorAll('input[required]');
+    const submissionForm = document.getElementById('projectSubmissionForm');
+    const inputs = submissionForm.querySelectorAll('input[required]');
+    const verificationForm = document.getElementById('emailVerificationForm');
 
     inputs.forEach(input => {
         input.addEventListener('input', validateInput);
         input.addEventListener('blur', validateInput);
     });
 
-    form.addEventListener('submit', handleSubmission);
+    submissionForm.addEventListener('submit', handleSubmission);
+    verificationForm.addEventListener('submit', handleEmailVerification);
 
     // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -77,6 +79,37 @@ function showAlert(message, type = 'danger') {
     }, 5000);
 }
 
+function handleEmailVerification(event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    formData.append('email', document.getElementById('verifyEmail').value);
+
+    fetch('/verify_email', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+                document.getElementById('registrationCard').style.display = 'none';
+                document.getElementById('submissionForm').style.display = 'block';
+                document.getElementById('email').value = document.getElementById('verifyEmail').value;
+
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('verifyEmailModal'));
+                modal.hide();
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred during email verification');
+        });
+}
+
 function initializeCountdown() {
     fetch('/get_deadline')
         .then(response => response.json())
@@ -115,6 +148,14 @@ function handleSubmission(event) {
     formData.append('email', document.getElementById('email').value);
     formData.append('github', document.getElementById('github').value);
     formData.append('video', document.getElementById('video').value);
+    formData.append('live_demo_url', document.getElementById('live_demo_url').value);
+
+    const username = document.getElementById('demo_username').value;
+    const password = document.getElementById('demo_password').value;
+    if (username && password) {
+        formData.append('demo_username', username);
+        formData.append('demo_password', password);
+    }
 
     fetch('/submit', {
         method: 'POST',
@@ -124,12 +165,13 @@ function handleSubmission(event) {
         .then(data => {
             if (data.success) {
                 showAlert(data.message, 'success');
-                document.getElementById('submissionForm').reset();
+                document.getElementById('projectSubmissionForm').reset();
                 // Reset validation icons
                 document.querySelectorAll('.validation-icon').forEach(icon => {
                     icon.innerHTML = '';
                     icon.classList.remove('valid', 'invalid');
                 });
+                loadSubmissions(); // Reload the submissions list
             } else {
                 showAlert(data.message, 'danger');
             }
@@ -152,12 +194,24 @@ function loadSubmissions() {
                     const submissionDate = new Date(submission.submitted_at).toLocaleString();
                     const item = document.createElement('div');
                     item.className = 'list-group-item neuromorphic mb-2';
+
+                    let credentialsHtml = '';
+                    if (submission.demo_credentials) {
+                        credentialsHtml = `
+                            <strong>Demo Credentials:</strong><br>
+                            Username: ${submission.demo_credentials.username}<br>
+                            Password: ${submission.demo_credentials.password}<br>
+                        `;
+                    }
+
                     item.innerHTML = `
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>Email:</strong> ${submission.email}<br>
                                 <strong>GitHub:</strong> <a href="${submission.github_repo}" target="_blank">${submission.github_repo}</a><br>
-                                <strong>Demo:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a>
+                                <strong>Demo Video:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a><br>
+                                <strong>Live Demo:</strong> <a href="${submission.live_demo_url}" target="_blank">View Live Demo</a><br>
+                                ${credentialsHtml}
                             </div>
                             <small class="text-muted">${submissionDate}</small>
                         </div>
