@@ -54,6 +54,11 @@ body {
     padding: 2rem 0;
     position: relative;
     z-index: 1;
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .logo {
@@ -66,18 +71,19 @@ body {
     transform: scale(1.05);
 }
 
-.theme-toggle {
+.header-buttons {
     position: absolute;
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    gap: 0.5rem;
 }
 
-.view-submissions-btn {
-    position: absolute;
-    right: 5rem;
-    top: 50%;
-    transform: translateY(-50%);
+.registration-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
 }
 
 .neuromorphic {
@@ -204,10 +210,6 @@ body {
     h1 {
         font-size: 1.5rem;
     }
-
-    .view-submissions-btn {
-        right: 4rem;
-    }
 }
 
 @media (max-width: 576px) {
@@ -220,15 +222,22 @@ body {
         padding: 15px;
     }
 
-    .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .theme-toggle,
-    .view-submissions-btn {
+    .header-buttons {
         position: static;
         transform: none;
+        display: flex;
+        justify-content: center;
+        margin-top: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .registration-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%;
         margin-bottom: 0.5rem;
     }
 }

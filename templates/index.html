@@ -13,12 +13,14 @@
 
     <header class="fixed-top header-shadow">
         <div class="container text-center py-3 position-relative">
-            <button class="btn theme-toggle" onclick="toggleTheme()">
-                <i class="bi bi-moon-fill"></i>
-            </button>
-            <button type="button" class="btn view-submissions-btn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
-                View All Submissions
-            </button>
+            <div class="header-buttons">
+                <button type="button" class="btn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
+                    View All Submissions
+                </button>
+                <button class="btn theme-toggle" onclick="toggleTheme()">
+                    <i class="bi bi-moon-fill"></i>
+                </button>
+            </div>
             <img src="{{ url_for('static', filename='images/logo-site-300x256.png') }}" alt="Decoding Data Science Logo" class="logo">
             <h1 class="mt-2">Hackathon Submission Portal</h1>
         </div>
@@ -32,25 +34,27 @@
         </div>
 
         <!-- Registration Card -->
-        <div id="registrationCard" class="row justify-content-center">
+        <div id="registrationCard" class="row justify-content-center w-100">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body text-center">
                         <h3 class="card-title mb-4">Welcome to Hackathon Submission</h3>
                         <p class="mb-4">Please verify your registration to continue</p>
-                        <button type="button" class="btn me-2" data-bs-toggle="modal" data-bs-target="#verifyEmailModal">
-                            Already Registered
-                        </button>
-                        <a href="mailto:support@example.com" class="btn">
-                            Request Registration
-                        </a>
+                        <div class="registration-buttons">
+                            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#verifyEmailModal">
+                                Already Registered
+                            </button>
+                            <a href="mailto:support@example.com" class="btn">
+                                Request Registration
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Submission Form -->
-        <div id="submissionForm" class="row justify-content-center" style="display: none;">
+        <div id="submissionForm" class="row justify-content-center w-100" style="display: none;">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
