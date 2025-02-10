@@ -1,7 +1,7 @@
 :root {
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --background-color: #f0f0f0;
-    --primary-color: #007bff;
+    --background-color: #e2e2e2;
+    --primary-color: #ff0000;
     --header-height: 120px;
     --footer-height: 60px;
 }
@@ -97,7 +97,7 @@ body {
 }
 
 .neuromorphic-countdown {
-    font-size: 2rem;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--primary-color);
     padding: 15px;
@@ -134,7 +134,7 @@ body {
     }
 
     .neuromorphic-countdown {
-        font-size: 1.5rem;
+        font-size: 0.75rem;
     }
 
     .main-content {
