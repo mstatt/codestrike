@@ -13,7 +13,6 @@
         <div class="container text-center py-3 position-relative">
             <div class="header-content d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <div id="countdown" class="neuromorphic-countdown me-3"></div>
                     <img src="{{ url_for('static', filename='images/logo-site-300x256.png') }}" alt="Decoding Data Science Logo" class="logo">
                 </div>
                 <div class="header-buttons">
@@ -34,7 +33,7 @@
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
-                        <h3 class="card-title text-center mb-3">Submit Your Project</h3>
+                        <div id="countdown" class="neuromorphic-countdown text-center mb-4"></div>
                         <form id="projectSubmissionForm">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Team/Leader Email Address</label>
