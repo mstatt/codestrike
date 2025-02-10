@@ -537,7 +537,11 @@ function handleAdminUpdate(event) {
     const firstPrize = document.getElementById('firstPrize').value;
     const secondPrize = document.getElementById('secondPrize').value;
     const thirdPrize = document.getElementById('thirdPrize').value;
+    const hackathonLogo = document.getElementById('hackathonLogo').files[0];
 
+    if (hackathonLogo) {
+        formData.append('logo', hackathonLogo);
+    }
 
     if (newDeadline) {
         formData.append('deadline', newDeadline);
@@ -583,6 +587,14 @@ function handleAdminUpdate(event) {
                 const detailsModal = document.getElementById('hackathonDetailsModal');
                 if (detailsModal) {
                     if (data.details) {
+                        // Update image if provided
+                        if (data.details.image) {
+                            const modalImage = detailsModal.querySelector('.hackathon-image-container img');
+                            if (modalImage) {
+                                modalImage.src = `/static/images/${data.details.image}`;
+                            }
+                        }
+
                         // Update title if provided
                         if (data.details.title) {
                             detailsModal.querySelector('.modal-title').textContent = data.details.title;
@@ -1408,7 +1420,11 @@ function handleAdminUpdate(event) {
     const firstPrize = document.getElementById('firstPrize').value;
     const secondPrize = document.getElementById('secondPrize').value;
     const thirdPrize = document.getElementById('thirdPrize').value;
+    const hackathonLogo = document.getElementById('hackathonLogo').files[0];
 
+    if (hackathonLogo) {
+        formData.append('logo', hackathonLogo);
+    }
 
     if (newDeadline) {
         formData.append('deadline', newDeadline);
@@ -1454,6 +1470,14 @@ function handleAdminUpdate(event) {
                 const detailsModal = document.getElementById('hackathonDetailsModal');
                 if (detailsModal) {
                     if (data.details) {
+                        // Update image if provided
+                        if (data.details.image) {
+                            const modalImage = detailsModal.querySelector('.hackathon-image-container img');
+                            if (modalImage) {
+                                modalImage.src = `/static/images/${data.details.image}`;
+                            }
+                        }
+
                         // Update title if provided
                         if (data.details.title) {
                             detailsModal.querySelector('.modal-title').textContent = data.details.title;
