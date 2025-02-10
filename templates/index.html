@@ -133,7 +133,7 @@
                                 </div>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-lg">Submit Project</button>
+                                <button type="button" class="btn btn-lg" onclick="previewSubmission()">Preview Submission</button>
                                 <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#criteriaModal">
                                     View Judging Criteria
                                 </button>
@@ -144,6 +144,58 @@
             </div>
         </div>
     </main>
+
+    <!-- Preview Submission Modal -->
+    <div class="modal fade" id="previewSubmissionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Preview Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-content">
+                        <h6>Team Information</h6>
+                        <div class="mb-3">
+                            <strong>Team Email:</strong> <span id="previewEmail"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Team Name:</strong> <span id="previewTeamName"></span>
+                        </div>
+                        <h6>Project Details</h6>
+                        <div class="mb-3">
+                            <strong>Project Name:</strong> <span id="previewProjectName"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>GitHub Repository:</strong> 
+                            <a id="previewGithub" href="#" target="_blank"></a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Demo Video:</strong>
+                            <a id="previewVideo" href="#" target="_blank"></a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Live Demo URL:</strong>
+                            <a id="previewLiveDemo" href="#" target="_blank"></a>
+                        </div>
+                        <div id="previewCredentials" class="mb-3 d-none">
+                            <h6>Demo Credentials</h6>
+                            <div class="mb-2">
+                                <strong>Username:</strong> <span id="previewUsername"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Password:</strong> <span id="previewPassword"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">Edit</button>
+                    <button type="button" class="btn btn-primary" onclick="submitFinalProject()">Submit Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="fixed-bottom footer-shadow">
         <div class="container py-3">

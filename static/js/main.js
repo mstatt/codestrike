@@ -86,6 +86,14 @@ function updateHackathonDeadlines() {
                 document.getElementById('secondPrize').value = data.prizes.second || '';
                 document.getElementById('thirdPrize').value = data.prizes.third || '';
             }
+            // Update modal image if exists
+            if (data.image) {
+                const modalImage = document.querySelector('#hackathonDetailsModal .hackathon-image-container img');
+                if (modalImage) {
+                    const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+                    modalImage.src = `/static/images/${data.image}?t=${timestamp}`;
+                }
+            }
         })
         .catch(error => {
             console.error('Error loading hackathon details:', error);
@@ -222,9 +230,58 @@ function showAlert(message, type = 'danger') {
 }
 
 
-function handleSubmission(event) {
-    event.preventDefault();
 
+function previewSubmission() {
+    // Get all form values
+    const email = document.getElementById('email').value;
+    const teamName = document.getElementById('team_name').value;
+    const projectName = document.getElementById('project_name').value;
+    const github = document.getElementById('github').value;
+    const video = document.getElementById('video').value;
+    const liveDemo = document.getElementById('live_demo_url').value;
+    const username = document.getElementById('demo_username').value;
+    const password = document.getElementById('demo_password').value;
+
+    // Validate required fields
+    if (!email || !teamName || !projectName || !github || !video || !liveDemo) {
+        showAlert('Please fill in all required fields before previewing', 'warning');
+        return;
+    }
+
+    // Update preview modal content
+    document.getElementById('previewEmail').textContent = email;
+    document.getElementById('previewTeamName').textContent = teamName;
+    document.getElementById('previewProjectName').textContent = projectName;
+
+    const githubLink = document.getElementById('previewGithub');
+    githubLink.href = github;
+    githubLink.textContent = github;
+
+    const videoLink = document.getElementById('previewVideo');
+    videoLink.href = video;
+    videoLink.textContent = video;
+
+    const liveDemoLink = document.getElementById('previewLiveDemo');
+    liveDemoLink.href = liveDemo;
+    liveDemoLink.textContent = liveDemo;
+
+    // Handle optional credentials
+    const credentialsSection = document.getElementById('previewCredentials');
+    if (username && password) {
+        document.getElementById('previewUsername').textContent = username;
+        document.getElementById('previewPassword').textContent = password;
+        credentialsSection.classList.remove('d-none');
+    } else {
+        credentialsSection.classList.add('d-none');
+    }
+
+    // Show preview modal
+    const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
+    previewModal.show();
+}
+
+function submitFinalProject() {
+    // Get form values
     const formData = new FormData();
     formData.append('email', document.getElementById('email').value);
     formData.append('team_name', document.getElementById('team_name').value);
@@ -240,6 +297,7 @@ function handleSubmission(event) {
         formData.append('demo_password', password);
     }
 
+    // Submit the form
     fetch('/submit', {
         method: 'POST',
         body: formData
@@ -247,6 +305,10 @@ function handleSubmission(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close preview modal
+                const previewModal = bootstrap.Modal.getInstance(document.getElementById('previewSubmissionModal'));
+                previewModal.hide();
+
                 showAlert(data.message, 'success');
                 document.getElementById('projectSubmissionForm').reset();
                 // Reset validation icons
@@ -263,6 +325,11 @@ function handleSubmission(event) {
             console.error('Error:', error);
             showAlert('An error occurred while submitting the form');
         });
+}
+
+function handleSubmission(event) {
+    event.preventDefault();
+    previewSubmission();
 }
 
 function loadSubmissions() {
@@ -583,46 +650,39 @@ function handleAdminUpdate(event) {
                 updateHackathonDeadlines(); // Refresh deadlines
                 checkDeadlineForMenuItems(); // Update menu items visibility
 
-                // Update modal content if it exists
+                // Update modal content
                 const detailsModal = document.getElementById('hackathonDetailsModal');
-                if (detailsModal) {
-                    if (data.details) {
-                        // Update image if provided
-                        if (data.details.image) {
-                            const modalImage = detailsModal.querySelector('.hackathon-image-container img');
-                            if (modalImage) {
-                                modalImage.src = `/static/images/${data.details.image}`;
-                            }
+                if (detailsModal && data.details) {
+                    // Update image if provided
+                    if (data.details.image) {
+                        const modalImage = detailsModal.querySelector('.hackathon-image-container img');
+                        if (modalImage) {
+                            const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+                            modalImage.src = `/static/images/${data.details.image}?t=${timestamp}`;
                         }
+                    }
 
-                        // Update title if provided
-                        if (data.details.title) {
-                            detailsModal.querySelector('.modal-title').textContent = data.details.title;
+                    // Update other modal content
+                    if (data.details.title) {
+                        detailsModal.querySelector('.modal-title').textContent = data.details.title;
+                    }
+                    if (data.details.description) {
+                        detailsModal.querySelector('p').textContent = data.details.description;
+                    }
+                    if (data.details.prizes) {
+                        const prizeDivs = detailsModal.querySelectorAll('.card-body p');
+                        if (prizeDivs.length >= 3) {
+                            prizeDivs[0].textContent = data.details.prizes.first || '$5,000';
+                            prizeDivs[1].textContent = data.details.prizes.second || '$3,000';
+                            prizeDivs[2].textContent = data.details.prizes.third || '$2,000';
                         }
-
-                        // Update description if provided
-                        if (data.details.description) {
-                            detailsModal.querySelector('p').textContent = data.details.description;
-                        }
-
-                        // Update prizes if provided
-                        if (data.details.prizes) {
-                            const prizeDivs = detailsModal.querySelectorAll('.card-body p');
-                            if (prizeDivs.length >= 3) {
-                                prizeDivs[0].textContent = data.details.prizes.first || '$5,000';
-                                prizeDivs[1].textContent = data.details.prizes.second || '$3,000';
-                                prizeDivs[2].textContent = data.details.prizes.third || '$2,000';
-                            }
-                        }
-
-                        // Update rules if provided
-                        if (data.details.rules) {
-                            const rulesList = detailsModal.querySelector('.list-group-flush');
-                            if (rulesList) {
-                                rulesList.innerHTML = data.details.rules
-                                    .map(rule => `<li class="list-group-item">${rule}</li>`)
-                                    .join('');
-                            }
+                    }
+                    if (data.details.rules) {
+                        const rulesList = detailsModal.querySelector('.list-group-flush');
+                        if (rulesList) {
+                            rulesList.innerHTML = data.details.rules
+                                .map(rule => `<li class="list-group-item">${rule}</li>`)
+                                .join('');
                         }
                     }
                 }
@@ -882,7 +942,7 @@ function loadTeams() {
                 });
             } else {
                 showAlert(data.message || 'Failed to load teams', 'danger');
-            }
+                        }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -1107,45 +1167,7 @@ function showAlert(message, type = 'danger') {
 
 function handleSubmission(event) {
     event.preventDefault();
-
-    const formData = new FormData();
-    formData.append('email', document.getElementById('email').value);
-    formData.append('team_name', document.getElementById('team_name').value);
-    formData.append('project_name', document.getElementById('project_name').value);
-    formData.append('github', document.getElementById('github').value);
-    formData.append('video', document.getElementById('video').value);
-    formData.append('live_demo_url', document.getElementById('live_demo_url').value);
-
-    const username = document.getElementById('demo_username').value;
-    const password = document.getElementById('demo_password').value;
-    if (username && password) {
-        formData.append('demo_username', username);
-        formData.append('demo_password', password);
-    }
-
-    fetch('/submit', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert(data.message, 'success');
-                document.getElementById('projectSubmissionForm').reset();
-                // Reset validation icons
-                document.querySelectorAll('.validation-icon').forEach(icon => {
-                    icon.innerHTML = '';
-                    icon.classList.remove('valid', 'invalid');
-                });
-                loadSubmissions();
-            } else {
-                showAlert(data.message, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('An error occurred while submitting the form');
-        });
+    previewSubmission();
 }
 
 function loadSubmissions() {
@@ -1466,46 +1488,39 @@ function handleAdminUpdate(event) {
                 updateHackathonDeadlines(); // Refresh deadlines
                 checkDeadlineForMenuItems(); // Update menu items visibility
 
-                // Update modal content if it exists
+                // Update modal content
                 const detailsModal = document.getElementById('hackathonDetailsModal');
-                if (detailsModal) {
-                    if (data.details) {
-                        // Update image if provided
-                        if (data.details.image) {
-                            const modalImage = detailsModal.querySelector('.hackathon-image-container img');
-                            if (modalImage) {
-                                modalImage.src = `/static/images/${data.details.image}`;
-                            }
+                if (detailsModal && data.details) {
+                    // Update image if provided
+                    if (data.details.image) {
+                        const modalImage = detailsModal.querySelector('.hackathon-image-container img');
+                        if (modalImage) {
+                            const timestamp = new Date().getTime(); // Add timestamp to prevent caching
+                            modalImage.src = `/static/images/${data.details.image}?t=${timestamp}`;
                         }
+                    }
 
-                        // Update title if provided
-                        if (data.details.title) {
-                            detailsModal.querySelector('.modal-title').textContent = data.details.title;
+                    // Update other modal content
+                    if (data.details.title) {
+                        detailsModal.querySelector('.modal-title').textContent = data.details.title;
+                    }
+                    if (data.details.description) {
+                        detailsModal.querySelector('p').textContent = data.details.description;
+                    }
+                    if (data.details.prizes) {
+                        const prizeDivs = detailsModal.querySelectorAll('.card-body p');
+                        if (prizeDivs.length >= 3) {
+                            prizeDivs[0].textContent = data.details.prizes.first || '$5,000';
+                            prizeDivs[1].textContent = data.details.prizes.second || '$3,000';
+                            prizeDivs[2].textContent = data.details.prizes.third || '$2,000';
                         }
-
-                        // Update description if provided
-                        if (data.details.description) {
-                            detailsModal.querySelector('p').textContent = data.details.description;
-                        }
-
-                        // Update prizes if provided
-                        if (data.details.prizes) {
-                            const prizeDivs = detailsModal.querySelectorAll('.card-body p');
-                            if (prizeDivs.length >= 3) {
-                                prizeDivs[0].textContent = data.details.prizes.first || '$5,000';
-                                prizeDivs[1].textContent = data.details.prizes.second || '$3,000';
-                                prizeDivs[2].textContent = data.details.prizes.third || '$2,000';
-                            }
-                        }
-
-                        // Update rules if provided
-                        if (data.details.rules) {
-                            const rulesList = detailsModal.querySelector('.list-group-flush');
-                            if (rulesList) {
-                                rulesList.innerHTML = data.details.rules
-                                    .map(rule => `<li class="list-group-item">${rule}</li>`)
-                                    .join('');
-                            }
+                    }
+                    if (data.details.rules) {
+                        const rulesList = detailsModal.querySelector('.list-group-flush');
+                        if (rulesList) {
+                            rulesList.innerHTML = data.details.rules
+                                .map(rule => `<li class="list-group-item">${rule}</li>`)
+                                .join('');
                         }
                     }
                 }
