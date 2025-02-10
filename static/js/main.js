@@ -83,6 +83,21 @@ function updateHackathonDeadlines() {
                 const deadline = new Date(data.deadline.replace(/,/, '')); // Remove comma from date string
                 const formattedDeadline = deadline.toISOString().slice(0, 16);
                 document.getElementById('newDeadline').value = formattedDeadline;
+
+                // Format deadline for display in modal
+                const displayDeadline = deadline.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Update deadline in modal if the element exists
+                const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
+                if (deadlineDisplay) {
+                    deadlineDisplay.textContent = `Submission Deadline: ${displayDeadline}`;
+                }
             }
             if (data.title) {
                 document.getElementById('hackathonTitle').value = data.title;
@@ -930,7 +945,7 @@ function loadWinners() {
 function loadTeams() {
     fetch('/admin/teams')
         .then(response => response.json())
-        .then(data => {
+        .then(data=> {
             if (data.success) {
                 const tableBody = document.getElementById('teamsTableBody');
                 tableBody.innerHTML = '';

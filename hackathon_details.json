@@ -1,5 +1,5 @@
 {
-  "deadline": "02/10/2025, 11:31:00 PM",
+  "deadline": "02/12/2025, 09:31:00 PM",
   "title": "Decoding Data Science Challenge",
   "description": "Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.",
   "rules": [
@@ -10,8 +10,8 @@
     "Each team must submit a working demo and documentation"
   ],
   "prizes": {
-    "first": "$15,000",
-    "second": "$10,000",
-    "third": "$7,500"
+    "first": "$5,000",
+    "second": "$2,500",
+    "third": "$1,500"
   }
 }
