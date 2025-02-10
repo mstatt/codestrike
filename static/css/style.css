@@ -1,7 +1,7 @@
 :root {
     --shadow-color: rgba(0, 0, 0, 0.2);
     --background-color: #000000;
-    --primary-color: #FF0000;
+    --primary-color: #960f1b;
     --secondary-color: #1D9BF0;
     --text-color: #ffffff;
     --header-height: 80px;
@@ -62,11 +62,11 @@ body {
     align-items: center;
     justify-content: center;
     background: var(--card-bg);
-    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(150, 15, 27, 0.1);
     height: 38px;
     white-space: nowrap;
     min-width: min-content;
-    border: 1px solid rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(150, 15, 27, 0.2);
 }
 
 .main-content {
@@ -89,13 +89,9 @@ body {
 .neuromorphic {
     background: var(--card-bg);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--primary-color);
     padding: 20px;
     transition: all 0.3s ease;
-}
-
-.neuromorphic:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -110,12 +106,12 @@ body {
 }
 
 .neuromorphic-input::placeholder {
-    color: rgba(255, 0, 0, 0.5);
+    color: rgba(150, 15, 27, 0.5);
 }
 
 .neuromorphic-input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 0 2px rgba(150, 15, 27, 0.2);
     outline: none;
 }
 
@@ -125,17 +121,17 @@ body {
     padding: 12px 24px !important;
     font-weight: 700 !important;
     font-size: 15px !important;
-    background: var(--card-bg) !important;
-    color: var(--text-color) !important;
+    background: var(--primary-color) !important;
+    color: white !important;
     transition: all 0.2s ease !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid var(--primary-color) !important;
 }
 
 .btn:hover {
-    background: var(--primary-color) !important;
-    color: white !important;
+    background: white !important;
+    color: var(--primary-color) !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(150, 15, 27, 0.2);
 }
 
 .btn:active {
@@ -156,6 +152,7 @@ body {
     margin: 0.5rem 0;
     border-radius: 16px;
     transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Added permanent shadow */
 }
 
 .list-group-item:hover {
@@ -204,6 +201,7 @@ body {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Added permanent shadow */
 }
 
 .modal-header {
