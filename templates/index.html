@@ -32,13 +32,7 @@
         <!-- Submission Form -->
         <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
             <div class="col-12 col-md-8 col-lg-6">
-                <div id="noActiveHackathon" class="card neuromorphic d-none">
-                    <div class="card-body text-center">
-                        <h3 class="mb-4">No Active Hackathons</h3>
-                        <p>There are currently no active hackathons. Please check back later.</p>
-                    </div>
-                </div>
-                <div id="submissionCard" class="card neuromorphic">
+                <div class="card neuromorphic">
                     <div class="card-body">
                         <form id="projectSubmissionForm" class="needs-validation" novalidate>
                             <div class="mb-4">
@@ -181,30 +175,8 @@
                 <div class="modal-body">
                     <form id="adminUpdateForm">
                         <div class="mb-3">
-                            <label for="hackathonName" class="form-label">Hackathon Name</label>
-                            <input type="text" class="form-control neuromorphic-input" id="hackathonName" required>
-                            <small class="form-text text-muted">Active hackathon name or create a new one</small>
-                        </div>
-                        <div class="mb-3">
                             <label for="newDeadline" class="form-label">Update Deadline</label>
-                            <input type="datetime-local" class="form-control neuromorphic-input" id="newDeadline" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Available Hackathons</label>
-                            <div class="table-responsive">
-                                <table class="table table-dark" id="hackathonsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="hackathonsTableBody">
-                                        <!-- Hackathons will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
+                            <input type="datetime-local" class="form-control neuromorphic-input" id="newDeadline">
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Registered Emails</label>
@@ -227,7 +199,7 @@
                             </div>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn">Create/Update Hackathon</button>
+                            <button type="submit" class="btn">Update Deadline</button>
                             <button type="button" class="btn ms-2" onclick="adminLogout()">Logout</button>
                         </div>
                     </form>
