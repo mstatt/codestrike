@@ -43,10 +43,16 @@ def submit():
         github = request.form.get('github')
         video = request.form.get('video')
 
-        # Check if email already exists
+        # Load existing submissions
         submissions = load_submissions()
+
+        # Check if email already exists
         if any(s['email'] == email for s in submissions):
             return jsonify({'success': False, 'message': 'Email already used for submission'}), 400
+
+        # Check if GitHub repository already exists
+        if any(s['github_repo'] == github for s in submissions):
+            return jsonify({'success': False, 'message': 'This GitHub repository has already been submitted'}), 400
 
         # Create new submission
         submission = {
