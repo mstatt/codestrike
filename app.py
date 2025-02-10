@@ -4,6 +4,7 @@ import csv
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import logging
+from werkzeug.utils import secure_filename
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -14,6 +15,9 @@ SUBMISSIONS_FILE = 'submissions.json'
 USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 HACKATHON_DETAILS_FILE = 'hackathon_details.json'
+
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg'}
 
 # Create users and teams file if it doesn't exist
 if not os.path.exists(USERS_AND_TEAMS_FILE):
@@ -95,6 +99,10 @@ def save_hackathon_details(details):
     except Exception as e:
         logging.error(f"Error saving hackathon details: {str(e)}")
         return False
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -210,6 +218,14 @@ def admin_update():
     try:
         # Load current details
         current_details = load_hackathon_details()
+
+        # Handle image upload
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                current_details['image'] = filename
 
         # Update deadline if provided
         deadline = request.form.get('deadline')
