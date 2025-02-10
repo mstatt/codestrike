@@ -30,28 +30,8 @@
             <div id="countdown" class="neuromorphic-countdown"></div>
         </div>
 
-        <!-- Registration Card -->
-        <div id="registrationCard" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
-            <div class="col-12 col-md-8 col-lg-6">
-                <div class="card neuromorphic">
-                    <div class="card-body text-center">
-                        <h3 class="card-title mb-4">Welcome to Hackathon Submission</h3>
-                        <p class="mb-4">Please verify your registration to continue</p>
-                        <div class="registration-buttons">
-                            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#verifyEmailModal">
-                                Already Registered
-                            </button>
-                            <a href="mailto:support@example.com" class="btn">
-                                Request Registration
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Submission Form -->
-        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0" style="display: none;">
+        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
@@ -111,35 +91,12 @@
 
     <footer class="fixed-bottom footer-shadow">
         <div class="container py-3 d-flex justify-content-between align-items-center">
-            <button type="button" class="btn" id="viewSubmissionsBtn" style="display: none;" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
+            <button type="button" class="btn" id="viewSubmissionsBtn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
                 See Subs
             </button>
             <p class="mb-0">Copyright @2025 Decoding Data Science</p>
         </div>
     </footer>
-
-    <!-- Email Verification Modal -->
-    <div class="modal fade" id="verifyEmailModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content neuromorphic">
-                <div class="modal-header">
-                    <h5 class="modal-title">Verify Your Email</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="emailVerificationForm">
-                        <div class="mb-3">
-                            <label for="verifyEmail" class="form-label">Registered Email Address</label>
-                            <input type="email" class="form-control neuromorphic-input" id="verifyEmail" required>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn">Verify Email</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Judging Criteria Modal -->
     <div class="modal fade" id="criteriaModal" tabindex="-1">

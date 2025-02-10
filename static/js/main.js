@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const submissionForm = document.getElementById('projectSubmissionForm');
     const inputs = submissionForm.querySelectorAll('input[required]');
-    const verificationForm = document.getElementById('emailVerificationForm');
 
     inputs.forEach(input => {
         input.addEventListener('input', validateInput);
@@ -13,12 +12,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     submissionForm.addEventListener('submit', handleSubmission);
-    verificationForm.addEventListener('submit', handleEmailVerification);
 
     // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon();
+
+    // Show submissions button since form is visible by default
+    document.getElementById('viewSubmissionsBtn').style.display = 'block';
 
     // Load submissions after the page loads
     loadSubmissions();
@@ -77,38 +78,6 @@ function showAlert(message, type = 'danger') {
         alert.classList.remove('show');
         setTimeout(() => alert.remove(), 150);
     }, 5000);
-}
-
-function handleEmailVerification(event) {
-    event.preventDefault();
-
-    const formData = new FormData();
-    formData.append('email', document.getElementById('verifyEmail').value);
-
-    fetch('/verify_email', {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert(data.message, 'success');
-                document.getElementById('registrationCard').style.display = 'none';
-                document.getElementById('submissionForm').style.display = 'block';
-                document.getElementById('email').value = document.getElementById('verifyEmail').value;
-                document.getElementById('viewSubmissionsBtn').style.display = 'block';
-
-                // Close the modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('verifyEmailModal'));
-                modal.hide();
-            } else {
-                showAlert(data.message, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('An error occurred during email verification');
-        });
 }
 
 function initializeCountdown() {
@@ -196,23 +165,13 @@ function loadSubmissions() {
                     const item = document.createElement('div');
                     item.className = 'list-group-item neuromorphic mb-2';
 
-                    let credentialsHtml = '';
-                    if (submission.demo_credentials) {
-                        credentialsHtml = `
-                            <strong>Demo Credentials:</strong><br>
-                            Username: ${submission.demo_credentials.username}<br>
-                            Password: ${submission.demo_credentials.password}<br>
-                        `;
-                    }
-
                     item.innerHTML = `
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>Email:</strong> ${submission.email}<br>
                                 <strong>GitHub:</strong> <a href="${submission.github_repo}" target="_blank">${submission.github_repo}</a><br>
                                 <strong>Demo Video:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a><br>
-                                <strong>Live Demo:</strong> <a href="${submission.live_demo_url}" target="_blank">View Live Demo</a><br>
-                                ${credentialsHtml}
+                                <strong>Live Demo:</strong> <a href="${submission.live_demo_url}" target="_blank">View Live Demo</a>
                             </div>
                             <small class="text-muted">${submissionDate}</small>
                         </div>
