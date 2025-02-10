@@ -9,16 +9,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <div class="background-logo"></div>
-
     <header class="fixed-top header-shadow">
         <div class="container text-center py-3 position-relative">
-            <div class="header-buttons">
-                <button class="btn theme-toggle" onclick="toggleTheme()">
-                    <i class="bi bi-moon-fill"></i>
-                </button>
+            <div class="header-content d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='images/logo-site-300x256.png') }}" alt="Decoding Data Science Logo" class="logo">
+                    <div id="countdown" class="neuromorphic-countdown ms-3"></div>
+                </div>
+                <div class="header-buttons">
+                    <button class="btn theme-toggle" onclick="toggleTheme()">
+                        <i class="bi bi-moon-fill"></i>
+                    </button>
+                </div>
             </div>
-            <img src="{{ url_for('static', filename='images/logo-site-300x256.png') }}" alt="Decoding Data Science Logo" class="logo">
             <h1 class="mt-2">Hackathon Submission Portal</h1>
         </div>
     </header>
@@ -32,9 +35,6 @@
                 <div class="card neuromorphic">
                     <div class="card-body">
                         <h3 class="card-title text-center mb-3">Submit Your Project</h3>
-                        <div class="text-center mb-4">
-                            <div id="countdown" class="neuromorphic-countdown"></div>
-                        </div>
                         <form id="projectSubmissionForm">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Team/Leader Email Address</label>

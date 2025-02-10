@@ -29,9 +29,27 @@ body {
     box-shadow: 0 4px 6px var(--shadow-color);
 }
 
-.footer-shadow {
-    background-color: var(--background-color);
-    box-shadow: 0 -4px 6px var(--shadow-color);
+.header-content {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.logo {
+    max-width: 120px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.neuromorphic-countdown {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: inline-block;
+    background: var(--background-color);
+    box-shadow: 5px 5px 10px var(--shadow-color),
+                -5px -5px 10px rgba(255, 255, 255, 0.7);
 }
 
 .main-content {
@@ -43,12 +61,6 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-}
-
-.logo {
-    max-width: 200px;
-    height: auto;
-    transition: transform 0.3s ease;
 }
 
 .logo:hover {
@@ -124,18 +136,6 @@ body {
                 -6px -6px 12px rgba(255, 255, 255, 0.7) !important;
 }
 
-.neuromorphic-countdown {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    padding: 12px 20px;
-    border-radius: 12px;
-    display: inline-block;
-    background: var(--background-color);
-    box-shadow: 5px 5px 10px var(--shadow-color),
-                -5px -5px 10px rgba(255, 255, 255, 0.7);
-}
-
 [data-theme="dark"] .neuromorphic-countdown {
     box-shadow: 5px 5px 10px var(--shadow-color),
                 -5px -5px 10px rgba(255, 255, 255, 0.1);
@@ -176,11 +176,17 @@ body {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     :root {
-        --header-height: 140px;
+        --header-height: 160px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
     }
 
     .logo {
-        max-width: 150px;
+        max-width: 100px;
     }
 
     .neuromorphic-countdown {
@@ -194,6 +200,7 @@ body {
 
     h1 {
         font-size: 1.5rem;
+        margin-top: 0.5rem;
     }
 }
 
