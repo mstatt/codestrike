@@ -57,6 +57,44 @@ def safe_file_operation(func):
             raise FileAccessError(f"Unexpected error: {str(e)}")
     return wrapper
 
+@safe_file_operation
+def verify_admin_credentials(email, password):
+    """Verify admin credentials with proper error handling"""
+    try:
+        # First ensure the credentials file exists
+        if not os.path.exists(ADMIN_CREDENTIALS_FILE):
+            logger.warning("Admin credentials file not found, creating with default credentials")
+            initialize_admin_credentials()
+
+        # Read and verify credentials
+        with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
+            content = f.read().strip()
+            logger.debug(f"Reading admin credentials file: {len(content)} characters")
+
+            if not content:
+                logger.error("Admin credentials file is empty")
+                return False
+
+            stored_credentials = content.split(':')
+            if len(stored_credentials) != 2:
+                logger.error(f"Invalid credential format in file: found {len(stored_credentials)} parts")
+                return False
+
+            stored_email, stored_password_hash = stored_credentials
+            logger.info(f"Verifying login attempt for email: {email}")
+
+            # Verify credentials
+            is_valid = email == stored_email and check_password_hash(stored_password_hash, password)
+            if not is_valid:
+                logger.warning(f"Failed login attempt for email: {email}")
+            else:
+                logger.info(f"Successful login for email: {email}")
+            return is_valid
+
+    except Exception as e:
+        logger.error(f"Error verifying admin credentials: {str(e)}")
+        return False
+
 @lru_cache(maxsize=1)
 @safe_file_operation
 def load_submissions():
@@ -97,32 +135,6 @@ def is_registered_email(email):
         return any(user['email'].lower() == email.lower() for user in users)
     except Exception as e:
         logger.error(f"Error checking registered emails: {str(e)}")
-        return False
-
-@safe_file_operation
-def verify_admin_credentials(email, password):
-    """Verify admin credentials with proper error handling"""
-    try:
-        with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
-            stored_credentials = f.read().strip().split(':')
-            if len(stored_credentials) != 2:
-                logger.error("Invalid credential format in file")
-                return False
-            stored_email, stored_password_hash = stored_credentials
-
-            # Log attempt without exposing sensitive information
-            logger.info(f"Admin login attempt for email: {email}")
-
-            is_valid = email == stored_email and check_password_hash(stored_password_hash, password)
-            if not is_valid:
-                logger.warning(f"Failed login attempt for admin email: {email}")
-            return is_valid
-    except FileNotFoundError:
-        logger.error("Admin credentials file not found")
-        initialize_admin_credentials()
-        return False
-    except Exception as e:
-        logger.error(f"Error verifying admin credentials: {str(e)}")
         return False
 
 @lru_cache(maxsize=1)
