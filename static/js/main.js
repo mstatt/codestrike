@@ -98,6 +98,12 @@ function updateHackathonDeadlines() {
                 if (deadlineDisplay) {
                     deadlineDisplay.textContent = `Submission Deadline: ${displayDeadline}`;
                 }
+            } else {
+                // Handle case where deadline is not set
+                const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
+                if (deadlineDisplay) {
+                    deadlineDisplay.textContent = 'Submission Deadline: Not yet announced';
+                }
             }
             if (data.title) {
                 document.getElementById('hackathonTitle').value = data.title;
@@ -125,6 +131,12 @@ function updateHackathonDeadlines() {
         .catch(error => {
             console.error('Error loading hackathon details:', error);
             showAlert('Error loading hackathon details');
+
+            // Set default message for deadline in case of error
+            const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
+            if (deadlineDisplay) {
+                deadlineDisplay.textContent = 'Submission Deadline: Unable to load';
+            }
         });
 }
 
@@ -930,7 +942,7 @@ function loadWinners() {
                             <p class="mb-1">${winner.project_name}</p>
                             <p class="mb-1">Points: ${winner.points}</p>
                         </div>
-                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                        <<span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
                 `;
                 winnersList.appendChild(item);
@@ -945,7 +957,7 @@ function loadWinners() {
 function loadTeams() {
     fetch('/admin/teams')
         .then(response => response.json())
-        .then(data=> {
+        .then(data => {
             if (data.success) {
                 const tableBody = document.getElementById('teamsTableBody');
                 tableBody.innerHTML = '';
