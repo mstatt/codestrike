@@ -96,6 +96,7 @@ function handleEmailVerification(event) {
                 document.getElementById('registrationCard').style.display = 'none';
                 document.getElementById('submissionForm').style.display = 'block';
                 document.getElementById('email').value = document.getElementById('verifyEmail').value;
+                document.getElementById('viewSubmissionsBtn').style.display = 'block';
 
                 // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('verifyEmailModal'));
