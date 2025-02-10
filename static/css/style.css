@@ -1,18 +1,27 @@
 :root {
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --background-color: #e2e2e2;
+    --background-color: #cecece;
     --primary-color: #ff0000;
+    --text-color: #000000;
     --header-height: 120px;
     --footer-height: 60px;
 }
 
+[data-theme="dark"] {
+    --background-color: #222222;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --text-color: #ffffff;
+}
+
 body {
     background-color: var(--background-color);
+    color: var(--text-color);
     font-family: 'Arial', sans-serif;
     padding-top: var(--header-height);
     padding-bottom: var(--footer-height);
     position: relative;
     overflow-x: hidden;
+    transition: background-color 0.3s ease;
 }
 
 .background-logo {
@@ -57,6 +66,13 @@ body {
     transform: scale(1.05);
 }
 
+.theme-toggle {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .neuromorphic {
     background: var(--background-color);
     border-radius: 15px;
@@ -64,6 +80,11 @@ body {
                 -8px -8px 15px rgba(255, 255, 255, 0.7);
     padding: 20px;
     transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .neuromorphic {
+    box-shadow: 8px 8px 15px var(--shadow-color),
+                -8px -8px 15px rgba(255, 255, 255, 0.1);
 }
 
 .neuromorphic:hover {
@@ -79,21 +100,24 @@ body {
     box-shadow: inset 5px 5px 10px var(--shadow-color),
                 inset -5px -5px 10px rgba(255, 255, 255, 0.7);
     width: 100%;
+    color: var(--text-color);
 }
 
-.neuromorphic-button {
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-weight: bold;
-    transition: all 0.3s ease;
+.btn {
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 20px !important;
+    font-weight: bold !important;
+    background: var(--background-color) !important;
+    color: var(--text-color) !important;
+    transition: all 0.3s ease !important;
     box-shadow: 5px 5px 10px var(--shadow-color),
-                -5px -5px 10px rgba(255, 255, 255, 0.7);
+                -5px -5px 10px rgba(255, 255, 255, 0.7) !important;
 }
 
-.neuromorphic-button:active {
+.btn:active {
     box-shadow: inset 3px 3px 5px var(--shadow-color),
-                inset -3px -3px 5px rgba(255, 255, 255, 0.7);
+                inset -3px -3px 5px rgba(255, 255, 255, 0.7) !important;
 }
 
 .neuromorphic-countdown {
@@ -116,6 +140,7 @@ body {
     border-radius: 10px;
     box-shadow: inset 3px 3px 5px var(--shadow-color),
                 inset -3px -3px 5px rgba(255, 255, 255, 0.7);
+    color: var(--text-color);
 }
 
 .validation-icon {
@@ -177,7 +202,7 @@ body {
         padding: 15px;
     }
 
-    .neuromorphic-button {
+    .btn {
         width: 100%;
         margin-bottom: 0.5rem;
     }

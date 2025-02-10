@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     form.addEventListener('submit', handleSubmission);
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggleIcon();
 });
 
 function validateInput(event) {
@@ -26,6 +31,29 @@ function validateInput(event) {
         validationIcon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
         validationIcon.classList.add('invalid');
         validationIcon.classList.remove('valid');
+    }
+}
+
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleIcon();
+}
+
+function updateThemeToggleIcon() {
+    const themeToggle = document.querySelector('.theme-toggle i');
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+
+    if (currentTheme === 'dark') {
+        themeToggle.classList.remove('bi-moon-fill');
+        themeToggle.classList.add('bi-sun-fill');
+    } else {
+        themeToggle.classList.remove('bi-sun-fill');
+        themeToggle.classList.add('bi-moon-fill');
     }
 }
 
