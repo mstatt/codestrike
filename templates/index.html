@@ -56,6 +56,13 @@
                                 </div>
                             </div>
                             <div class="mb-4">
+                                <label for="team_name" class="form-label">Team Name</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control neuromorphic-input" id="team_name" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
                                 <label for="github" class="form-label">GitHub Repo</label>
                                 <div class="input-group">
                                     <input type="url" class="form-control neuromorphic-input" id="github" required>
@@ -102,20 +109,26 @@
 
     <footer class="fixed-bottom footer-shadow">
         <div class="container py-3 d-flex justify-content-between align-items-center">
-            <div class="submission-buttons-group">
-                <div class="btn-group">
-                    <button type="button" class="btn" id="viewSubmissionsBtn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
-                        <i class="bi bi-collection me-2"></i>All Submissions
-                    </button>
-                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#winnersModal">
-                        <i class="bi bi-trophy me-2"></i>Winners
-                    </button>
+            <div class="col-4 d-flex justify-content-center">
+                <div class="submission-buttons-group">
+                    <div class="btn-group">
+                        <button type="button" class="btn" id="viewSubmissionsBtn" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
+                            <i class="bi bi-collection me-2"></i>All Submissions
+                        </button>
+                        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#winnersModal">
+                            <i class="bi bi-trophy me-2"></i>Winners
+                        </button>
+                    </div>
                 </div>
             </div>
-            <p class="mb-0 text-muted">Copyright @2025 by FALCONS.AI</p>
-            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#adminModal">
-                <i class="bi bi-shield-lock me-2"></i>Admin
-            </button>
+            <div class="col-4 text-center">
+                <p class="mb-0 text-muted">Copyright @2025 by FALCONS.AI</p>
+            </div>
+            <div class="col-4 d-flex justify-content-end">
+                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#adminModal">
+                    <i class="bi bi-shield-lock me-2"></i>Admin
+                </button>
+            </div>
         </div>
     </footer>
 

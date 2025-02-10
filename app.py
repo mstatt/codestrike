@@ -85,11 +85,15 @@ def submit():
             return jsonify({'success': False, 'message': 'Submission deadline has passed'}), 400
 
         email = request.form.get('email')
+        team_name = request.form.get('team_name')  # New field
         github = request.form.get('github')
         video = request.form.get('video')
         live_demo_url = request.form.get('live_demo_url')
         demo_username = request.form.get('demo_username')
         demo_password = request.form.get('demo_password')
+
+        if not all([email, team_name, github, video, live_demo_url]):  # Added team_name validation
+            return jsonify({'success': False, 'message': 'All required fields must be filled'}), 400
 
         if not is_registered_email(email):
             return jsonify({'success': False, 'message': 'Email not registered for the hackathon'}), 400
@@ -104,6 +108,7 @@ def submit():
 
         submission = {
             'email': email,
+            'team_name': team_name,  # Added team name
             'github_repo': github,
             'demo_video': video,
             'live_demo_url': live_demo_url,
@@ -301,6 +306,21 @@ def delete_email():
     except Exception as e:
         logging.error(f"Error deleting email: {str(e)}")
         return jsonify({'success': False, 'message': 'Error deleting email'}), 500
+
+@app.route('/winners')
+def get_winners():
+    try:
+        with open('winners.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            winners = list(reader)
+            # Convert points to integer for proper sorting
+            for winner in winners:
+                winner['points'] = int(winner['points'])
+            winners.sort(key=lambda x: x['points'], reverse=True)
+        return jsonify({'winners': winners})
+    except Exception as e:
+        logging.error(f"Error loading winners: {str(e)}")
+        return jsonify({'error': 'Could not load winners'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -147,6 +147,7 @@ function handleSubmission(event) {
 
     const formData = new FormData();
     formData.append('email', document.getElementById('email').value);
+    formData.append('team_name', document.getElementById('team_name').value);
     formData.append('github', document.getElementById('github').value);
     formData.append('video', document.getElementById('video').value);
     formData.append('live_demo_url', document.getElementById('live_demo_url').value);
@@ -172,7 +173,7 @@ function handleSubmission(event) {
                     icon.innerHTML = '';
                     icon.classList.remove('valid', 'invalid');
                 });
-                loadSubmissions(); // Reload the submissions list
+                loadSubmissions();
             } else {
                 showAlert(data.message, 'danger');
             }
@@ -199,6 +200,7 @@ function loadSubmissions() {
                     item.innerHTML = `
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
+                                <h5 class="mb-2">${submission.team_name}</h5>
                                 <strong>Email:</strong> ${submission.email}<br>
                                 <strong>GitHub:</strong> <a href="${submission.github_repo}" target="_blank">${submission.github_repo}</a><br>
                                 <strong>Demo Video:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a><br>
@@ -216,42 +218,40 @@ function loadSubmissions() {
         });
 }
 
-// Add this to your existing JavaScript file
 
 function loadWinners() {
-    // Simulated winners data (replace with actual API call when implemented)
-    const winners = [
-        { team: "Team Alpha", points: 95, position: 1 },
-        { team: "Data Wizards", points: 88, position: 2 },
-        { team: "Code Ninjas", points: 82, position: 3 },
-        { team: "Binary Bandits", points: 78, position: 4 },
-        { team: "Tech Titans", points: 75, position: 5 }
-    ];
+    fetch('/winners')
+        .then(response => response.json())
+        .then(data => {
+            const winnersList = document.getElementById('winnersList');
+            winnersList.innerHTML = '';
 
-    const winnersList = document.getElementById('winnersList');
-    winnersList.innerHTML = '';
+            data.winners.forEach((winner, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item neuromorphic mb-2';
 
-    winners.sort((a, b) => b.points - a.points)
-        .forEach(winner => {
-            const item = document.createElement('div');
-            item.className = 'list-group-item neuromorphic mb-2';
+                // Add trophy emoji for top 3
+                let trophyIcon = '';
+                if (index === 0) trophyIcon = '🏆 ';
+                else if (index === 1) trophyIcon = '🥈 ';
+                else if (index === 2) trophyIcon = '🥉 ';
 
-            // Add trophy emoji for top 3
-            let trophyIcon = '';
-            if (winner.position === 1) trophyIcon = '🏆 ';
-            else if (winner.position === 2) trophyIcon = '🥈 ';
-            else if (winner.position === 3) trophyIcon = '🥉 ';
-
-            item.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1">${trophyIcon}${winner.team}</h5>
-                        <p class="mb-1">Points: ${winner.points}</p>
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">${trophyIcon}${winner.team_name}</h5>
+                            <p class="mb-1">${winner.project_name}</p>
+                            <p class="mb-1">Points: ${winner.points}</p>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
-                    <span class="badge bg-primary rounded-pill">#${winner.position}</span>
-                </div>
-            `;
-            winnersList.appendChild(item);
+                `;
+                winnersList.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading winners:', error);
+            showAlert('Error loading winners');
         });
 }
 
