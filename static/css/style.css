@@ -57,10 +57,13 @@ body {
     border-radius: 10px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     background: var(--background-color);
     box-shadow: 5px 5px 10px var(--shadow-color),
                 -5px -5px 10px rgba(255, 255, 255, 0.7);
     height: 38px; /* Match btn height */
+    white-space: nowrap; /* Prevent text wrapping */
+    min-width: min-content; /* Allow shrinking to content */
 }
 
 [data-theme="dark"] .neuromorphic-countdown {
