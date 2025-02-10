@@ -118,6 +118,27 @@ body {
                 inset -3px -3px 5px rgba(255, 255, 255, 0.7);
 }
 
+.validation-icon {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 10px !important;
+}
+
+.validation-icon.valid {
+    color: #198754;
+}
+
+.validation-icon.invalid {
+    color: #dc3545;
+}
+
+#alertContainer .alert {
+    min-width: 300px;
+    max-width: 500px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     :root {
