@@ -2,7 +2,8 @@ import os
 import json
 import csv
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,6 +13,7 @@ app.secret_key = "hackathon_submission_secret_key"
 
 SUBMISSIONS_FILE = 'submissions.json'
 REGISTERED_EMAILS_FILE = 'registered_emails.csv'
+ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -34,6 +36,17 @@ def is_registered_email(email):
             return email.lower() in registered_emails
     except Exception as e:
         logging.error(f"Error checking registered emails: {str(e)}")
+        return False
+
+def verify_admin_credentials(email, password):
+    try:
+        with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
+            stored_credentials = f.read().strip().split(':')
+            stored_email = stored_credentials[0]
+            stored_password_hash = stored_credentials[1]
+            return email == stored_email and check_password_hash(stored_password_hash, password)
+    except Exception as e:
+        logging.error(f"Error verifying admin credentials: {str(e)}")
         return False
 
 @app.route('/')
@@ -123,3 +136,44 @@ def get_submissions():
     except Exception as e:
         logging.error(f"Error loading submissions: {str(e)}")
         return jsonify({'error': 'Could not load submissions'}), 500
+
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    try:
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if verify_admin_credentials(email, password):
+            session['admin'] = True
+            return jsonify({'success': True})
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+    except Exception as e:
+        logging.error(f"Error in admin login: {str(e)}")
+        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
+@app.route('/admin/update', methods=['POST'])
+def admin_update():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        deadline = request.form.get('deadline')
+        if deadline:
+            with open('deadline.txt', 'w') as f:
+                f.write(deadline)
+
+        new_email = request.form.get('new_email')
+        if new_email:
+            with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([new_email])
+
+        return jsonify({'success': True, 'message': 'Updates successful'})
+    except Exception as e:
+        logging.error(f"Error in admin update: {str(e)}")
+        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin', None)
+    return redirect(url_for('index'))

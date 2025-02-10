@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load submissions after the page loads
     loadSubmissions();
+
+    // Add admin-related event listeners
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const adminUpdateForm = document.getElementById('adminUpdateForm');
+
+    adminLoginForm.addEventListener('submit', handleAdminLogin);
+    adminUpdateForm.addEventListener('submit', handleAdminUpdate);
 });
 
 function validateInput(event) {
@@ -183,4 +190,76 @@ function loadSubmissions() {
             console.error('Error loading submissions:', error);
             showAlert('Error loading submissions');
         });
+}
+
+// Add admin-related functions
+function handleAdminLogin(event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    formData.append('email', document.getElementById('adminEmail').value);
+    formData.append('password', document.getElementById('adminPassword').value);
+
+    fetch('/admin/login', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close login modal and open admin panel
+                const loginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
+                loginModal.hide();
+
+                const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
+                adminPanelModal.show();
+
+                // Reset form
+                document.getElementById('adminLoginForm').reset();
+            } else {
+                showAlert(data.message || 'Invalid credentials', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred during login');
+        });
+}
+
+function handleAdminUpdate(event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    const newDeadline = document.getElementById('newDeadline').value;
+    const newEmail = document.getElementById('newEmail').value;
+
+    if (newDeadline) {
+        formData.append('deadline', new Date(newDeadline).toLocaleString());
+    }
+    if (newEmail) {
+        formData.append('new_email', newEmail);
+    }
+
+    fetch('/admin/update', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Updates successful', 'success');
+                document.getElementById('adminUpdateForm').reset();
+                initializeCountdown(); // Refresh countdown if deadline was updated
+            } else {
+                showAlert(data.message || 'Update failed', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred during update');
+        });
+}
+
+function adminLogout() {
+    window.location.href = '/admin/logout';
 }
