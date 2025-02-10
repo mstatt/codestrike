@@ -100,7 +100,7 @@ body {
 }
 
 .neuromorphic {
-    background: rgba(22, 24, 28, 0.9);
+    background: rgba(22, 24, 28, 0.7);
     border-radius: 16px;
     border: 2px solid var(--primary-color);
     padding: 15px;
@@ -160,7 +160,7 @@ body {
 }
 
 .list-group-item {
-    background: rgba(22, 24, 28, 0.9);
+    background: rgba(22, 24, 28, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1rem;
     margin: 0.5rem 0;
@@ -220,7 +220,7 @@ body {
 }
 
 .modal-content.neuromorphic {
-    background: rgba(22, 24, 28, 0.9);
+    background: rgba(22, 24, 28, 0.7);
 }
 
 .modal-header {
