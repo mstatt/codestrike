@@ -30,7 +30,7 @@ body {
 }
 
 .header-shadow {
-    background-color: rgba(0, 0, 0, 0.65);
+    background-color: rgba(40, 40, 40, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -38,7 +38,7 @@ body {
 }
 
 .footer-shadow {
-    background-color: rgba(0, 0, 0, 0.65);
+    background-color: rgba(40, 40, 40, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -101,7 +101,7 @@ body {
 
 .neuromorphic-input {
     background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--primary-color) !important;
     border-radius: 4px;
     padding: 12px 15px;
     color: var(--text-color);
