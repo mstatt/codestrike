@@ -686,10 +686,8 @@ function handleAdminUpdate(event) {
         .then(data => {
             if (data.success) {
                 showAlert('Hackathon details updated successfully', 'success');
-
-                // Refresh all components that display deadline information
-                initializeCountdown(); // Refresh countdown timer
-                updateHackathonDeadlines(); // Refresh hackathon details modal
+                initializeCountdown(); // Refresh countdown
+                updateHackathonDeadlines(); // Refresh deadlines
                 checkDeadlineForMenuItems(); // Update menu items visibility
 
                 // Update modal content
@@ -941,10 +939,10 @@ function loadWinners() {
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-1">${trophyIcon}${winner.team_name}</h5>
-                            <p class="mb-1`${winner.project_name}</p>
+                            <p class="mb-1">${winner.project_name}</p>
                             <p class="mb-1">Points: ${winner.points}</p>
                         </div>
-                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                        <<span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
                 `;
                 winnersList.appendChild(item);
@@ -1527,10 +1525,8 @@ function handleAdminUpdate(event) {
         .then(data => {
             if (data.success) {
                 showAlert('Hackathon details updated successfully', 'success');
-
-                // Refresh all components that display deadline information
-                initializeCountdown(); // Refresh countdown timer
-                updateHackathonDeadlines(); // Refresh hackathon details modal
+                initializeCountdown(); // Refresh countdown
+                updateHackathonDeadlines(); // Refresh deadlines
                 checkDeadlineForMenuItems(); // Update menu items visibility
 
                 // Update modal content
