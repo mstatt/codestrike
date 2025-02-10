@@ -68,7 +68,7 @@ function updateHackathonDeadlines() {
         .then(data => {
             // Update form fields
             if (data.deadline) {
-                const deadline = new Date(data.deadline);
+                const deadline = new Date(data.deadline.replace(/,/, '')); // Remove comma from date string
                 const formattedDeadline = deadline.toISOString().slice(0, 16);
                 document.getElementById('newDeadline').value = formattedDeadline;
             }
@@ -78,7 +78,7 @@ function updateHackathonDeadlines() {
             if (data.description) {
                 document.getElementById('hackathonDescription').value = data.description;
             }
-            if (data.rules) {
+            if (data.rules && Array.isArray(data.rules)) {
                 document.getElementById('hackathonRules').value = data.rules.join('\n');
             }
             if (data.prizes) {
@@ -880,7 +880,7 @@ function loadTeams() {
 
 function deleteTeam(teamName) {
     if (!confirm('Are you sure you want to delete this team?')) {
-                return;
+        return;
     }
 
     fetch('/admin/teams/delete', {
@@ -952,35 +952,6 @@ function editTeam(button) {
     }
 }
 
-function updateHackathonDeadlines() {
-    fetch('/get_deadline')
-        .then(response => response.json())
-        .then(data => {
-            const deadline = new Date(data.deadline);
-            const registrationDeadline = new Date(deadline);
-            registrationDeadline.setDate(deadline.getDate() - 7); // Registration ends 7 days before submission
-
-            document.getElementById('registrationDeadline').textContent = registrationDeadline.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            document.getElementById('submissionDeadline').textContent = deadline.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching deadline:', error);
-            showAlert('Error loading deadline information');
-        });
-}
 document.addEventListener('DOMContentLoaded', function() {
     // Update hackathon details deadlines
     updateHackathonDeadlines();
@@ -1780,7 +1751,7 @@ function loadTeams() {
 
 function deleteTeam(teamName) {
     if (!confirm('Are you sure you want to delete this team?')) {
-                return;
+        return;
     }
 
     fetch('/admin/teams/delete', {
@@ -1850,34 +1821,4 @@ function editTeam(button) {
         teamInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
     }
-}
-
-function updateHackathonDeadlines() {
-    fetch('/get_deadline')
-        .then(response => response.json())
-        .then(data => {
-            const deadline = new Date(data.deadline);
-            const registrationDeadline = new Date(deadline);
-            registrationDeadline.setDate(deadline.getDate() - 7); // Registration ends 7 days before submission
-
-            document.getElementById('registrationDeadline').textContent = registrationDeadline.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            document.getElementById('submissionDeadline').textContent = deadline.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching deadline:', error);
-            showAlert('Error loading deadline information');
-        });
 }
