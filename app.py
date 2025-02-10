@@ -13,6 +13,7 @@ app.secret_key = "a_much_stronger_secret_key"
 SUBMISSIONS_FILE = 'submissions.json'
 USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
+HACKATHON_DETAILS_FILE = 'hackathon_details.json'
 
 # Create users and teams file if it doesn't exist
 if not os.path.exists(USERS_AND_TEAMS_FILE):
@@ -70,9 +71,35 @@ def verify_admin_credentials(email, password):
         logging.error(f"Error verifying admin credentials: {str(e)}")
         return False
 
+def load_hackathon_details():
+    try:
+        if os.path.exists(HACKATHON_DETAILS_FILE):
+            with open(HACKATHON_DETAILS_FILE, 'r') as f:
+                return json.load(f)
+        return {
+            "title": "FALCONS.AI Hack-a-thon",
+            "description": "Join us for an exciting hackathon!",
+            "deadline": "",
+            "rules": [],
+            "prizes": {"first": "$5,000", "second": "$3,000", "third": "$2,000"}
+        }
+    except Exception as e:
+        logging.error(f"Error loading hackathon details: {str(e)}")
+        return {}
+
+def save_hackathon_details(details):
+    try:
+        with open(HACKATHON_DETAILS_FILE, 'w') as f:
+            json.dump(details, f, indent=2)
+        return True
+    except Exception as e:
+        logging.error(f"Error saving hackathon details: {str(e)}")
+        return False
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    hackathon_details = load_hackathon_details()
+    return render_template('index.html', hackathon_details=hackathon_details)
 
 @app.route('/verify_email', methods=['POST'])
 def verify_email():
@@ -182,17 +209,46 @@ def admin_update():
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     try:
+        # Load current details
+        current_details = load_hackathon_details()
+
+        # Update deadline if provided
         deadline = request.form.get('deadline')
         if deadline:
             try:
                 parsed_deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
                 formatted_deadline = parsed_deadline.strftime('%m/%d/%Y, %I:%M:%S %p')
-                with open('deadline.txt', 'w') as f:
-                    f.write(formatted_deadline)
+                current_details['deadline'] = formatted_deadline
             except ValueError as e:
                 return jsonify({'success': False, 'message': 'Invalid deadline format'}), 400
 
-        return jsonify({'success': True, 'message': 'Updates successful'})
+        # Update other fields if provided
+        if request.form.get('title'):
+            current_details['title'] = request.form.get('title')
+        if request.form.get('description'):
+            current_details['description'] = request.form.get('description')
+        if request.form.get('rules'):
+            current_details['rules'] = request.form.get('rules').split('\n')
+
+        # Update prizes
+        prizes = current_details.get('prizes', {})
+        if request.form.get('first_prize'):
+            prizes['first'] = request.form.get('first_prize')
+        if request.form.get('second_prize'):
+            prizes['second'] = request.form.get('second_prize')
+        if request.form.get('third_prize'):
+            prizes['third'] = request.form.get('third_prize')
+        current_details['prizes'] = prizes
+
+        # Save updated details
+        if save_hackathon_details(current_details):
+            return jsonify({
+                'success': True, 
+                'message': 'Updates successful',
+                'details': current_details
+            })
+        return jsonify({'success': False, 'message': 'Failed to save updates'}), 500
+
     except Exception as e:
         logging.error(f"Error in admin update: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
@@ -576,6 +632,15 @@ def delete_winner():
 def admin_logout():
     session.pop('admin', None)
     return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+@app.route('/hackathon-details')
+def get_hackathon_details():
+    try:
+        details = load_hackathon_details()
+        return jsonify(details)
+    except Exception as e:
+        logging.error(f"Error getting hackathon details: {str(e)}")
+        return jsonify({'error': 'Could not load hackathon details'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

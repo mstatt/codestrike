@@ -58,6 +58,37 @@ function checkDeadlineForMenuItems() {
         });
 }
 
+function updateHackathonDeadlines() {
+    fetch('/hackathon-details')
+        .then(response => response.json())
+        .then(data => {
+            // Update form fields
+            if (data.deadline) {
+                const deadline = new Date(data.deadline);
+                const formattedDeadline = deadline.toISOString().slice(0, 16);
+                document.getElementById('newDeadline').value = formattedDeadline;
+            }
+            if (data.title) {
+                document.getElementById('hackathonTitle').value = data.title;
+            }
+            if (data.description) {
+                document.getElementById('hackathonDescription').value = data.description;
+            }
+            if (data.rules) {
+                document.getElementById('hackathonRules').value = data.rules.join('\n');
+            }
+            if (data.prizes) {
+                document.getElementById('firstPrize').value = data.prizes.first || '';
+                document.getElementById('secondPrize').value = data.prizes.second || '';
+                document.getElementById('thirdPrize').value = data.prizes.third || '';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading hackathon details:', error);
+            showAlert('Error loading hackathon details');
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer
     initializeCountdown();
@@ -107,6 +138,28 @@ document.addEventListener('DOMContentLoaded', function() {
         winnersModal.addEventListener('show.bs.modal', loadWinners);
     }
 
+    // Add event listener for admin panel modal
+    const adminPanelModal = document.getElementById('adminPanelModal');
+    if (adminPanelModal) {
+        adminPanelModal.addEventListener('show.bs.modal', function () {
+            // Load current hackathon details into form fields
+            updateHackathonDeadlines();
+            // Load other admin data
+            loadRegisteredEmails();
+            loadTeams();
+            loadAdminWinners();
+        });
+
+        adminPanelModal.addEventListener('hidden.bs.modal', function () {
+            // Re-enable page elements
+            document.body.classList.remove('modal-open');
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+        });
+    }
+
     // Add event listener for winners tab
     const winnersTab = document.getElementById('winners-tab');
     if (winnersTab) {
@@ -116,18 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const addWinnerForm = document.getElementById('addWinnerForm');
     if (addWinnerForm) {
         addWinnerForm.addEventListener('submit', handleAddWinner);
-    }
-
-    const adminPanelModal = document.getElementById('adminPanelModal');
-    if (adminPanelModal) {
-        adminPanelModal.addEventListener('hidden.bs.modal', function () {
-            // Re-enable page elements
-            document.body.classList.remove('modal-open');
-            const modalBackdrop = document.querySelector('.modal-backdrop');
-            if (modalBackdrop) {
-                modalBackdrop.remove();
-            }
-        });
     }
 });
 
@@ -552,7 +593,7 @@ function handleAdminUpdate(event) {
     const firstPrize = document.getElementById('firstPrize').value;
     const secondPrize = document.getElementById('secondPrize').value;
     const thirdPrize = document.getElementById('thirdPrize').value;
-    const logoFile = document.getElementById('hackathonLogo').files[0];
+
 
     if (newDeadline) {
         formData.append('deadline', newDeadline);
@@ -582,10 +623,6 @@ function handleAdminUpdate(event) {
         formData.append('third_prize', thirdPrize);
     }
 
-    if (logoFile) {
-        formData.append('logo', logoFile);
-    }
-
     fetch('/admin/update', {
         method: 'POST',
         body: formData
@@ -594,7 +631,6 @@ function handleAdminUpdate(event) {
         .then(data => {
             if (data.success) {
                 showAlert('Hackathon details updated successfully', 'success');
-                document.getElementById('adminUpdateForm').reset();
                 initializeCountdown(); // Refresh countdown
                 updateHackathonDeadlines(); // Refresh deadlines
                 checkDeadlineForMenuItems(); // Update menu items visibility
@@ -628,7 +664,6 @@ function handleAdminUpdate(event) {
                             const rulesList = detailsModal.querySelector('.list-group-flush');
                             if (rulesList) {
                                 rulesList.innerHTML = data.details.rules
-                                    .split('\n')
                                     .map(rule => `<li class="list-group-item">${rule}</li>`)
                                     .join('');
                             }
@@ -959,7 +994,7 @@ function editTeam(button) {
             .catch(error => {
                 console.error('Error:', error);
                 showAlert('An error occurred while updating team');
-                teamInput.value =oldTeamName;
+                teamInput.value = oldTeamName;
             });
 
         teamText.classList.remove('d-none');

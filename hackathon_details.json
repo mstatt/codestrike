@@ -1,0 +1,17 @@
+{
+  "title": "FALCONS.AI Hack-a-thon",
+  "description": "Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.",
+  "deadline": "02/20/2025, 11:59:00 PM",
+  "rules": [
+    "Teams must consist of 1-4 members",
+    "All code must be original and created during the hackathon",
+    "Use of open source libraries and APIs is allowed",
+    "Projects must be submitted before the deadline",
+    "Each team must submit a working demo and documentation"
+  ],
+  "prizes": {
+    "first": "$5,000",
+    "second": "$3,000",
+    "third": "$2,000"
+  }
+}

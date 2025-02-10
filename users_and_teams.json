@@ -2,12 +2,13 @@
   "teams": [
     "Falcons",
     "Xbox",
-    "Jackson 5"
+    "Jackson 5",
+    "Hello World"
   ],
   "users": [
     {
       "email": "john.doe@example.com",
-      "team": "Falcons"
+      "team": "Xbox"
     },
     {
       "email": "jane.smith@example.com",
