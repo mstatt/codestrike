@@ -178,12 +178,28 @@
                             <label for="newDeadline" class="form-label">Update Deadline</label>
                             <input type="datetime-local" class="form-control neuromorphic-input" id="newDeadline">
                         </div>
-                        <div class="mb-3">
-                            <label for="newEmail" class="form-label">Add Registered Email</label>
-                            <input type="email" class="form-control neuromorphic-input" id="newEmail">
+                        <div class="mb-4">
+                            <label class="form-label">Registered Emails</label>
+                            <div class="table-responsive">
+                                <table class="table table-dark" id="emailsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="emailsTableBody">
+                                        <!-- Emails will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="input-group mt-3">
+                                <input type="email" class="form-control neuromorphic-input" id="newEmail" placeholder="Add new email">
+                                <button type="button" class="btn" onclick="addNewEmail()">Add</button>
+                            </div>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn">Update</button>
+                            <button type="submit" class="btn">Update Deadline</button>
                             <button type="button" class="btn ms-2" onclick="adminLogout()">Logout</button>
                         </div>
                     </form>

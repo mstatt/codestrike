@@ -214,6 +214,9 @@ function handleAdminLogin(event) {
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
+                // Load registered emails
+                loadRegisteredEmails();
+
                 // Reset form
                 document.getElementById('adminLoginForm').reset();
             } else {
@@ -223,6 +226,141 @@ function handleAdminLogin(event) {
         .catch(error => {
             console.error('Error:', error);
             showAlert('An error occurred during login');
+        });
+}
+
+function loadRegisteredEmails() {
+    fetch('/admin/emails')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('emailsTableBody');
+            tableBody.innerHTML = '';
+
+            data.emails.forEach(email => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <span class="email-text">${email}</span>
+                        <input type="email" class="form-control neuromorphic-input d-none" value="${email}">
+                    </td>
+                    <td>
+                        <button class="btn btn-sm" onclick="editEmail(this)">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <button class="btn btn-sm" onclick="deleteEmail('${email}')">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading emails:', error);
+            showAlert('Error loading registered emails');
+        });
+}
+
+function addNewEmail() {
+    const emailInput = document.getElementById('newEmail');
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        showAlert('Please enter an email address', 'warning');
+        return;
+    }
+
+    fetch('/admin/emails/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Email added successfully', 'success');
+                emailInput.value = '';
+                loadRegisteredEmails();
+            } else {
+                showAlert(data.message || 'Failed to add email', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while adding email');
+        });
+}
+
+function editEmail(button) {
+    const row = button.closest('tr');
+    const emailText = row.querySelector('.email-text');
+    const emailInput = row.querySelector('input[type="email"]');
+
+    if (emailText.classList.contains('d-none')) {
+        // Save changes
+        const newEmail = emailInput.value.trim();
+        const oldEmail = emailText.textContent;
+
+        fetch('/admin/emails/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ oldEmail, newEmail })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    emailText.textContent = newEmail;
+                    showAlert('Email updated successfully', 'success');
+                } else {
+                    emailInput.value = oldEmail;
+                    showAlert(data.message || 'Failed to update email', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating email');
+                emailInput.value = oldEmail;
+            });
+
+        emailText.classList.remove('d-none');
+        emailInput.classList.add('d-none');
+        button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
+    } else {
+        // Show edit input
+        emailText.classList.add('d-none');
+        emailInput.classList.remove('d-none');
+        button.innerHTML = '<i class="bi bi-check-lg"></i>';
+    }
+}
+
+function deleteEmail(email) {
+    if (!confirm('Are you sure you want to delete this email?')) {
+        return;
+    }
+
+    fetch('/admin/emails/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Email deleted successfully', 'success');
+                loadRegisteredEmails();
+            } else {
+                showAlert(data.message || 'Failed to delete email', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while deleting email');
         });
 }
 

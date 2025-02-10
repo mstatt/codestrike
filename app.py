@@ -180,3 +180,127 @@ def admin_update():
 def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('index'))
+
+@app.route('/admin/emails')
+def get_registered_emails():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            emails = [row['email'] for row in reader]
+        return jsonify({'success': True, 'emails': emails})
+    except Exception as e:
+        logging.error(f"Error reading emails: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error reading emails'}), 500
+
+@app.route('/admin/emails/add', methods=['POST'])
+def add_email():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        email = data.get('email')
+
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400
+
+        # Read existing emails
+        existing_emails = []
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            existing_emails = [row['email'].lower() for row in reader]
+
+        if email.lower() in existing_emails:
+            return jsonify({'success': False, 'message': 'Email already exists'}), 400
+
+        # Append new email
+        with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([email])
+
+        return jsonify({'success': True, 'message': 'Email added successfully'})
+    except Exception as e:
+        logging.error(f"Error adding email: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error adding email'}), 500
+
+@app.route('/admin/emails/update', methods=['POST'])
+def update_email():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        old_email = data.get('oldEmail')
+        new_email = data.get('newEmail')
+
+        if not old_email or not new_email:
+            return jsonify({'success': False, 'message': 'Both old and new email are required'}), 400
+
+        # Read all emails
+        rows = []
+        email_updated = False
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['email'].lower() == old_email.lower():
+                    rows.append({'email': new_email})
+                    email_updated = True
+                else:
+                    rows.append(row)
+
+        if not email_updated:
+            return jsonify({'success': False, 'message': 'Email not found'}), 404
+
+        # Write back all emails
+        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['email'])
+            writer.writeheader()
+            writer.writerows(rows)
+
+        return jsonify({'success': True, 'message': 'Email updated successfully'})
+    except Exception as e:
+        logging.error(f"Error updating email: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error updating email'}), 500
+
+@app.route('/admin/emails/delete', methods=['POST'])
+def delete_email():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        email = data.get('email')
+
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400
+
+        # Read all emails except the one to delete
+        rows = []
+        email_found = False
+        with open(REGISTERED_EMAILS_FILE, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['email'].lower() != email.lower():
+                    rows.append(row)
+                else:
+                    email_found = True
+
+        if not email_found:
+            return jsonify({'success': False, 'message': 'Email not found'}), 404
+
+        # Write back remaining emails
+        with open(REGISTERED_EMAILS_FILE, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['email'])
+            writer.writeheader()
+            writer.writerows(rows)
+
+        return jsonify({'success': True, 'message': 'Email deleted successfully'})
+    except Exception as e:
+        logging.error(f"Error deleting email: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error deleting email'}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
