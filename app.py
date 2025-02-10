@@ -19,6 +19,24 @@ USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 HACKATHON_DETAILS_FILE = 'hackathon_details.json'
 
+# Default admin credentials
+DEFAULT_ADMIN_EMAIL = 'admin@hack.com'
+DEFAULT_ADMIN_PASSWORD = 'admin123'
+
+def initialize_admin_credentials():
+    """Initialize admin credentials file if it doesn't exist"""
+    try:
+        if not os.path.exists(ADMIN_CREDENTIALS_FILE):
+            password_hash = generate_password_hash(DEFAULT_ADMIN_PASSWORD)
+            with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
+                f.write(f"{DEFAULT_ADMIN_EMAIL}:{password_hash}")
+            logger.info("Admin credentials file created with default credentials")
+    except Exception as e:
+        logger.error(f"Error initializing admin credentials: {str(e)}")
+
+# Initialize admin credentials on startup
+initialize_admin_credentials()
+
 class FileAccessError(Exception):
     """Custom exception for file access errors"""
     pass
@@ -83,13 +101,29 @@ def is_registered_email(email):
 
 @safe_file_operation
 def verify_admin_credentials(email, password):
-    with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
-        stored_credentials = f.read().strip().split(':')
-        if len(stored_credentials) != 2:
-            logger.error(f"Invalid credential format in file")
-            return False
-        stored_email, stored_password_hash = stored_credentials
-        return email == stored_email and check_password_hash(stored_password_hash, password)
+    """Verify admin credentials with proper error handling"""
+    try:
+        with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
+            stored_credentials = f.read().strip().split(':')
+            if len(stored_credentials) != 2:
+                logger.error("Invalid credential format in file")
+                return False
+            stored_email, stored_password_hash = stored_credentials
+
+            # Log attempt without exposing sensitive information
+            logger.info(f"Admin login attempt for email: {email}")
+
+            is_valid = email == stored_email and check_password_hash(stored_password_hash, password)
+            if not is_valid:
+                logger.warning(f"Failed login attempt for admin email: {email}")
+            return is_valid
+    except FileNotFoundError:
+        logger.error("Admin credentials file not found")
+        initialize_admin_credentials()
+        return False
+    except Exception as e:
+        logger.error(f"Error verifying admin credentials: {str(e)}")
+        return False
 
 @lru_cache(maxsize=1)
 @safe_file_operation
@@ -197,19 +231,34 @@ def get_submissions():
 
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
+    """Handle admin login with improved error handling"""
     try:
         email = request.form.get('email')
         password = request.form.get('password')
+
+        if not email or not password:
+            return jsonify({
+                'success': False, 
+                'message': 'Email and password are required'
+            }), 400
 
         logger.debug(f"Admin login attempt with email: {email}")
 
         if verify_admin_credentials(email, password):
             session['admin'] = True
+            logger.info(f"Successful admin login for email: {email}")
             return jsonify({'success': True})
-        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+
+        return jsonify({
+            'success': False, 
+            'message': 'Invalid credentials'
+        }), 401
     except Exception as e:
-        logger.error(f"Error in admin login: {str(e)}")
-        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+        log_python_error(e, f"Error in admin login for email: {email}")
+        return jsonify({
+            'success': False, 
+            'message': 'An error occurred during login'
+        }), 500
 
 @app.route('/admin/update', methods=['POST'])
 def admin_update():
