@@ -14,9 +14,6 @@
     <header class="fixed-top header-shadow">
         <div class="container text-center py-3 position-relative">
             <div class="header-buttons">
-                <button type="button" class="btn" id="viewSubmissionsBtn" style="display: none;" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
-                    See Subs
-                </button>
                 <button class="btn theme-toggle" onclick="toggleTheme()">
                     <i class="bi bi-moon-fill"></i>
                 </button>
@@ -34,7 +31,7 @@
         </div>
 
         <!-- Registration Card -->
-        <div id="registrationCard" class="row justify-content-center w-100">
+        <div id="registrationCard" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body text-center">
@@ -54,7 +51,7 @@
         </div>
 
         <!-- Submission Form -->
-        <div id="submissionForm" class="row justify-content-center w-100" style="display: none;">
+        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0" style="display: none;">
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
@@ -113,7 +110,10 @@
     </main>
 
     <footer class="fixed-bottom footer-shadow">
-        <div class="container text-center py-3">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <button type="button" class="btn" id="viewSubmissionsBtn" style="display: none;" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
+                See Subs
+            </button>
             <p class="mb-0">Copyright @2025 Decoding Data Science</p>
         </div>
     </footer>

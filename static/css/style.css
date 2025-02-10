@@ -58,7 +58,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: stretch;
 }
 
 .logo {
@@ -234,6 +234,12 @@ body {
     .registration-buttons {
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    footer .container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
     }
 
     .btn {
