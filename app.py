@@ -3,7 +3,6 @@ import json
 import csv
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from werkzeug.security import check_password_hash, generate_password_hash
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -15,11 +14,9 @@ SUBMISSIONS_FILE = 'submissions.json'
 REGISTERED_EMAILS_FILE = 'registered_emails.csv'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
 
-# Hash the password and write admin credentials to file if it doesn't exist
-if not os.path.exists(ADMIN_CREDENTIALS_FILE):
-    hashed_password = generate_password_hash('WhyN0tM3#', method='pbkdf2:sha256')
-    with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
-        f.write(f'admin@hack.com:{hashed_password}')
+# Create admin credentials file with clear text for testing
+with open(ADMIN_CREDENTIALS_FILE, 'w') as f:
+    f.write('admin@hack.com:WhyN0tM3#')
 
 def load_submissions():
     if os.path.exists(SUBMISSIONS_FILE):
@@ -49,12 +46,11 @@ def verify_admin_credentials(email, password):
         with open(ADMIN_CREDENTIALS_FILE, 'r') as f:
             stored_credentials = f.read().strip().split(':')
             if len(stored_credentials) != 2:
-                logging.error("Invalid admin credentials format")
+                logging.error(f"Invalid credential format: {stored_credentials}")
                 return False
-            stored_email, stored_password_hash = stored_credentials
-            logging.debug(f"Verifying admin login for email: {email}")
-            logging.debug(f"Stored email: {stored_email}")
-            return email == stored_email and check_password_hash(stored_password_hash, password)
+            stored_email, stored_password = stored_credentials
+            logging.debug(f"Login attempt - Email: {email}, Stored email: {stored_email}")
+            return email == stored_email and password == stored_password
     except Exception as e:
         logging.error(f"Error verifying admin credentials: {str(e)}")
         return False
@@ -81,7 +77,6 @@ def verify_email():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        # Read deadline from file
         with open('deadline.txt', 'r') as f:
             deadline_str = f.read().strip()
             deadline = datetime.strptime(deadline_str, '%Y-%m-%d %H:%M:%S')
@@ -99,18 +94,14 @@ def submit():
         if not is_registered_email(email):
             return jsonify({'success': False, 'message': 'Email not registered for the hackathon'}), 400
 
-        # Load existing submissions
         submissions = load_submissions()
 
-        # Check if email already exists
         if any(s['email'] == email for s in submissions):
             return jsonify({'success': False, 'message': 'Email already used for submission'}), 400
 
-        # Check if GitHub repository already exists
         if any(s['github_repo'] == github for s in submissions):
             return jsonify({'success': False, 'message': 'This GitHub repository has already been submitted'}), 400
 
-        # Create new submission
         submission = {
             'email': email,
             'github_repo': github,
@@ -152,6 +143,8 @@ def admin_login():
     try:
         email = request.form.get('email')
         password = request.form.get('password')
+
+        logging.debug(f"Admin login attempt with email: {email}")
 
         if verify_admin_credentials(email, password):
             session['admin'] = True
