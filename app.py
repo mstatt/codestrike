@@ -79,7 +79,7 @@ def submit():
     try:
         with open('deadline.txt', 'r') as f:
             deadline_str = f.read().strip()
-            deadline = datetime.strptime(deadline_str, '%Y-%m-%d %H:%M:%S')
+            deadline = datetime.strptime(deadline_str, '%m/%d/%Y, %I:%M:%S %p')
 
         if datetime.now() > deadline:
             return jsonify({'success': False, 'message': 'Submission deadline has passed'}), 400
