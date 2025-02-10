@@ -85,14 +85,15 @@ def submit():
             return jsonify({'success': False, 'message': 'Submission deadline has passed'}), 400
 
         email = request.form.get('email')
-        team_name = request.form.get('team_name')  # New field
+        team_name = request.form.get('team_name')
+        project_name = request.form.get('project_name')  # New field
         github = request.form.get('github')
         video = request.form.get('video')
         live_demo_url = request.form.get('live_demo_url')
         demo_username = request.form.get('demo_username')
         demo_password = request.form.get('demo_password')
 
-        if not all([email, team_name, github, video, live_demo_url]):  # Added team_name validation
+        if not all([email, team_name, project_name, github, video, live_demo_url]):  # Added project_name validation
             return jsonify({'success': False, 'message': 'All required fields must be filled'}), 400
 
         if not is_registered_email(email):
@@ -108,7 +109,8 @@ def submit():
 
         submission = {
             'email': email,
-            'team_name': team_name,  # Added team name
+            'team_name': team_name,
+            'project_name': project_name,  # Added project name
             'github_repo': github,
             'demo_video': video,
             'live_demo_url': live_demo_url,

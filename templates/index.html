@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="d-flex flex-column min-vh-100">
+    <!-- Update header section -->
     <header class="fixed-top header-shadow">
         <div class="container py-3">
             <div class="header-content">
@@ -18,9 +19,28 @@
                 </div>
                 <div class="header-buttons">
                     <div id="countdown" class="neuromorphic-countdown me-3"></div>
-                    <button class="btn theme-toggle" onclick="toggleTheme()">
-                        <i class="bi bi-moon-fill"></i>
-                    </button>
+                    <div class="dropdown">
+                        <button class="btn" type="button" id="headerMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
+                            <li>
+                                <button class="dropdown-item" onclick="toggleTheme()">
+                                    <i class="bi bi-moon-fill me-2"></i>Toggle Theme
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
+                                    <i class="bi bi-collection me-2"></i>All Submissions
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#winnersModal">
+                                    <i class="bi bi-trophy me-2"></i>Winners
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,10 +75,18 @@
                                     <span class="input-group-text validation-icon"></span>
                                 </div>
                             </div>
+                            <!-- Update submission form to include Project Name -->
                             <div class="mb-4">
                                 <label for="team_name" class="form-label">Team Name</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control neuromorphic-input" id="team_name" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="project_name" class="form-label">Project Name</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control neuromorphic-input" id="project_name" required>
                                     <span class="input-group-text validation-icon"></span>
                                 </div>
                             </div>
@@ -215,9 +243,9 @@
         </div>
     </div>
 
-    <!-- Admin Panel Modal -->
+    <!-- Update Admin Panel Modal width -->
     <div class="modal fade" id="adminPanelModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 90%;">
             <div class="modal-content neuromorphic">
                 <div class="modal-header">
                     <h5 class="modal-title">Admin Panel</h5>

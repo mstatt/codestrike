@@ -159,6 +159,7 @@ function handleSubmission(event) {
     const formData = new FormData();
     formData.append('email', document.getElementById('email').value);
     formData.append('team_name', document.getElementById('team_name').value);
+    formData.append('project_name', document.getElementById('project_name').value);
     formData.append('github', document.getElementById('github').value);
     formData.append('video', document.getElementById('video').value);
     formData.append('live_demo_url', document.getElementById('live_demo_url').value);
@@ -212,6 +213,7 @@ function loadSubmissions() {
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-2">${submission.team_name}</h5>
+                                <p class="mb-2"><strong>Project:</strong> ${submission.project_name}</p>
                                 <strong>Email:</strong> ${submission.email}<br>
                                 <strong>GitHub:</strong> <a href="${submission.github_repo}" target="_blank">${submission.github_repo}</a><br>
                                 <strong>Demo Video:</strong> <a href="${submission.demo_video}" target="_blank">View Demo</a><br>
@@ -229,42 +231,6 @@ function loadSubmissions() {
         });
 }
 
-
-function loadWinners() {
-    fetch('/winners')
-        .then(response => response.json())
-        .then(data => {
-            const winnersList = document.getElementById('winnersList');
-            winnersList.innerHTML = '';
-
-            data.winners.forEach((winner, index) => {
-                const item = document.createElement('div');
-                item.className = 'list-group-item neuromorphic mb-2';
-
-                // Add trophy emoji for top 3
-                let trophyIcon = '';
-                if (index === 0) trophyIcon = '🏆 ';
-                else if (index === 1) trophyIcon = '🥈 ';
-                else if (index === 2) trophyIcon = '🥉 ';
-
-                item.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">${trophyIcon}${winner.team_name}</h5>
-                            <p class="mb-1">${winner.project_name}</p>
-                            <p class="mb-1">Points: ${winner.points}</p>
-                        </div>
-                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
-                    </div>
-                `;
-                winnersList.appendChild(item);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading winners:', error);
-            showAlert('Error loading winners');
-        });
-}
 
 
 // Add admin-related functions
@@ -630,5 +596,41 @@ function deleteWinner(teamName) {
         .catch(error => {
             console.error('Error:', error);
             showAlert('An error occurred while deleting winner');
+        });
+}
+
+function loadWinners() {
+    fetch('/winners')
+        .then(response => response.json())
+        .then(data => {
+            const winnersList = document.getElementById('winnersList');
+            winnersList.innerHTML = '';
+
+            data.winners.forEach((winner, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item neuromorphic mb-2';
+
+                // Add trophy emoji for top 3
+                let trophyIcon = '';
+                if (index === 0) trophyIcon = '🏆 ';
+                else if (index === 1) trophyIcon = '🥈 ';
+                else if (index === 2) trophyIcon = '🥉 ';
+
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">${trophyIcon}${winner.team_name}</h5>
+                            <p class="mb-1">${winner.project_name}</p>
+                            <p class="mb-1">Points: ${winner.points}</p>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                    </div>
+                `;
+                winnersList.appendChild(item);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading winners:', error);
+            showAlert('Error loading winners');
         });
 }
