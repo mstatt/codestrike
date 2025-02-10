@@ -255,8 +255,9 @@ function handleAdminLogin(event) {
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
-                // Load registered emails and winners
+                // Load registered emails, teams, and winners
                 loadRegisteredEmails();
+                loadTeams();
                 loadAdminWinners();
 
                 // Reset form
@@ -411,13 +412,9 @@ function handleAdminUpdate(event) {
 
     const formData = new FormData();
     const newDeadline = document.getElementById('newDeadline').value;
-    const newEmail = document.getElementById('newEmail').value;
 
     if (newDeadline) {
-        formData.append('deadline', new Date(newDeadline).toLocaleString());
-    }
-    if (newEmail) {
-        formData.append('new_email', newEmail);
+        formData.append('deadline', newDeadline);
     }
 
     fetch('/admin/update', {
@@ -427,9 +424,9 @@ function handleAdminUpdate(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showAlert('Updates successful', 'success');
+                showAlert('Deadline updated successfully', 'success');
                 document.getElementById('adminUpdateForm').reset();
-                initializeCountdown(); // Refresh countdown if deadline was updated
+                initializeCountdown(); // Refresh countdown
             } else {
                 showAlert(data.message || 'Update failed', 'danger');
             }
@@ -633,4 +630,85 @@ function loadWinners() {
             console.error('Error loading winners:', error);
             showAlert('Error loading winners');
         });
+}
+
+function loadTeams() {
+    fetch('/admin/teams')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const tableBody = document.getElementById('teamsTableBody');
+                tableBody.innerHTML = '';
+
+                data.teams.forEach(team => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <span class="team-text">${team.team_name}</span>
+                            <input type="text" class="form-control neuromorphic-input d-none" value="${team.team_name}">
+                        </td>
+                        <td>${team.email}</td>
+                        <td>
+                            <button class="btn btn-sm" onclick="editTeam(this)">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                showAlert(data.message || 'Failed to load teams', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An error occurred while loading teams');
+        });
+}
+
+function editTeam(button) {
+    const row = button.closest('tr');
+    const teamText = row.querySelector('.team-text');
+    const teamInput = row.querySelector('input[type="text"]');
+
+    if (teamText.classList.contains('d-none')) {
+        // Save changes
+        const newTeamName = teamInput.value.trim();
+        const oldTeamName = teamText.textContent;
+
+        fetch('/admin/teams/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                old_team_name: oldTeamName,
+                new_team_name: newTeamName
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    teamText.textContent = newTeamName;
+                    showAlert('Team updated successfully', 'success');
+                } else {
+                    teamInput.value = oldTeamName;
+                    showAlert(data.message || 'Failed to update team', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating team');
+                teamInput.value = oldTeamName;
+            });
+
+        teamText.classList.remove('d-none');
+        teamInput.classList.add('d-none');
+        button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
+    } else {
+        // Show edit input
+        teamText.classList.add('d-none');
+        teamInput.classList.remove('d-none');
+        button.innerHTML = '<i class="bi bi-check-lg"></i>';
+    }
 }

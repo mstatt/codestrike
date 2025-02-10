@@ -169,19 +169,66 @@ def admin_update():
     try:
         deadline = request.form.get('deadline')
         if deadline:
-            with open('deadline.txt', 'w') as f:
-                f.write(deadline)
-
-        new_email = request.form.get('new_email')
-        if new_email:
-            with open(REGISTERED_EMAILS_FILE, 'a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([new_email])
+            # Ensure deadline is properly formatted before writing
+            try:
+                parsed_deadline = datetime.strptime(deadline, '%Y-%m-%dT%H:%M')
+                formatted_deadline = parsed_deadline.strftime('%m/%d/%Y, %I:%M:%S %p')
+                with open('deadline.txt', 'w') as f:
+                    f.write(formatted_deadline)
+            except ValueError as e:
+                return jsonify({'success': False, 'message': 'Invalid deadline format'}), 400
 
         return jsonify({'success': True, 'message': 'Updates successful'})
     except Exception as e:
         logging.error(f"Error in admin update: {str(e)}")
         return jsonify({'success': False, 'message': 'An error occurred'}), 500
+
+@app.route('/admin/teams', methods=['GET'])
+def get_teams():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        submissions = load_submissions()
+        teams = [{'team_name': s['team_name'], 'email': s['email']} for s in submissions]
+        return jsonify({'success': True, 'teams': teams})
+    except Exception as e:
+        logging.error(f"Error loading teams: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error loading teams'}), 500
+
+@app.route('/admin/teams/update', methods=['POST'])
+def update_team():
+    if not session.get('admin'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    try:
+        data = request.get_json()
+        old_team_name = data.get('old_team_name')
+        new_team_name = data.get('new_team_name')
+
+        if not old_team_name or not new_team_name:
+            return jsonify({'success': False, 'message': 'Both old and new team names are required'}), 400
+
+        submissions = load_submissions()
+        team_updated = False
+
+        for submission in submissions:
+            if submission['team_name'] == old_team_name:
+                submission['team_name'] = new_team_name
+                team_updated = True
+                break
+
+        if not team_updated:
+            return jsonify({'success': False, 'message': 'Team not found'}), 404
+
+        with open(SUBMISSIONS_FILE, 'w') as f:
+            json.dump(submissions, f, indent=2)
+
+        return jsonify({'success': True, 'message': 'Team updated successfully'})
+    except Exception as e:
+        logging.error(f"Error updating team: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error updating team'}), 500
+
 
 @app.route('/admin/logout')
 def admin_logout():
