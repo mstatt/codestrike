@@ -30,19 +30,21 @@ body {
 }
 
 .header-shadow {
-    background-color: rgba(40, 40, 40, 0.85);
+    background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1030;
+    color: white;
 }
 
 .footer-shadow {
-    background-color: rgba(40, 40, 40, 0.85);
+    background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 1030;
+    color: white;
 }
 
 .header-content {
