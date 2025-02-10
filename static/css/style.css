@@ -2,17 +2,39 @@
     --shadow-color: rgba(0, 0, 0, 0.1);
     --background-color: #f0f0f0;
     --primary-color: #007bff;
+    --header-height: 120px;
+    --footer-height: 60px;
 }
 
 body {
     background-color: var(--background-color);
     font-family: 'Arial', sans-serif;
+    padding-top: var(--header-height);
+    padding-bottom: var(--footer-height);
+}
+
+.header-shadow {
+    background-color: var(--background-color);
+    box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.footer-shadow {
+    background-color: var(--background-color);
+    box-shadow: 0 -4px 6px var(--shadow-color);
+}
+
+.main-content {
+    padding: 2rem 0;
 }
 
 .logo {
-    max-width: 300px;
+    max-width: 200px;
     height: auto;
-    margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .neuromorphic {
@@ -36,6 +58,7 @@ body {
     padding: 12px 15px;
     box-shadow: inset 5px 5px 10px var(--shadow-color),
                 inset -5px -5px 10px rgba(255, 255, 255, 0.7);
+    width: 100%;
 }
 
 .neuromorphic-button {
@@ -65,16 +88,6 @@ body {
                 -8px -8px 15px rgba(255, 255, 255, 0.7);
 }
 
-footer {
-    margin-top: 3rem;
-    padding: 1rem;
-    color: #666;
-}
-
-.modal-content {
-    border: none;
-}
-
 .list-group-item {
     background: transparent;
     border: none;
@@ -83,4 +96,38 @@ footer {
     border-radius: 10px;
     box-shadow: inset 3px 3px 5px var(--shadow-color),
                 inset -3px -3px 5px rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    :root {
+        --header-height: 140px;
+    }
+
+    .logo {
+        max-width: 150px;
+    }
+
+    .neuromorphic-countdown {
+        font-size: 1.5rem;
+    }
+
+    .main-content {
+        padding: 1rem 0;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .neuromorphic {
+        padding: 15px;
+    }
+
+    .neuromorphic-button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
