@@ -270,3 +270,13 @@ body {
 .mb-4 {
     margin-bottom: 1rem !important;
 }
+
+/* Add these rules after the modal styling section */
+.btn-close {
+    filter: invert(15%) sepia(95%) saturate(6932%) hue-rotate(358deg) brightness(95%) contrast(112%) !important;
+    opacity: 1 !important;
+}
+
+.btn-close:hover {
+    opacity: 0.75 !important;
+}
