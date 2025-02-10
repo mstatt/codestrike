@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - ./submissions.json:/app/submissions.json
+      - ./users_and_teams.json:/app/users_and_teams.json
+      - ./winners.csv:/app/winners.csv
+      - ./hackathon_details.json:/app/hackathon_details.json
+      - ./admin_credentials.txt:/app/admin_credentials.txt
+      - ./static:/app/static
+    restart: unless-stopped
