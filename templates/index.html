@@ -36,6 +36,23 @@
             background-color: rgba(33, 37, 41, 0.75);
         }
 
+        /* Modal styling to ensure they're above other elements */
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
+
+        .modal {
+            z-index: 1055 !important;
+        }
+
+        /* Alert styling to keep them at the highest level */
+        #alertContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
         /* Basic modal styling */
         .modal-dialog {
             margin: 1.75rem auto;
@@ -74,11 +91,6 @@
                             <i class="bi bi-list"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
-                            <li>
-                                <button class="dropdown-item" onclick="toggleTheme()">
-                                    <i class="bi bi-moon-fill me-2"></i>Toggle Theme
-                                </button>
-                            </li>
                             <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#submissionFormModal">
                                     <i class="bi bi-upload me-2"></i>Submit Project
@@ -130,7 +142,6 @@
 
                         <h6 class="mb-3">About the Event</h6>
                         <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Codestrike brings together creative minds to build groundbreaking solutions.') }}</p>
-
                         <div class="card neuromorphic mb-4">
                             <div class="card-body">
                                 <div class="deadline-info">
@@ -318,7 +329,7 @@
 
         <!-- Judging Criteria Modal -->
         <div class="modal fade" id="criteriaModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content neuromorphic">
                     <div class="modal-header">
                         <h5 class="modal-title">Judging Criteria</h5>
@@ -371,7 +382,7 @@
 
         <!-- Winners Modal -->
         <div class="modal fade" id="winnersModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content neuromorphic">
                     <div class="modal-header">
                         <h5 class="modal-title">Winners List</h5>
@@ -389,7 +400,7 @@
 
         <!-- Admin Modal -->
         <div class="modal fade" id="adminModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content neuromorphic">
                     <div class="modal-header">
                         <h5 class="modal-title">Admin Login</h5>
