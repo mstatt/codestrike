@@ -50,15 +50,22 @@ body {
 }
 
 .neuromorphic-countdown {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--primary-color);
-    padding: 10px 15px;
-    border-radius: 12px;
-    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
     background: var(--background-color);
     box-shadow: 5px 5px 10px var(--shadow-color),
                 -5px -5px 10px rgba(255, 255, 255, 0.7);
+    height: 38px; /* Match btn height */
+}
+
+[data-theme="dark"] .neuromorphic-countdown {
+    box-shadow: 5px 5px 10px var(--shadow-color),
+                -5px -5px 10px rgba(255, 255, 255, 0.1);
 }
 
 .main-content {
@@ -142,11 +149,6 @@ body {
                 -6px -6px 12px rgba(255, 255, 255, 0.7) !important;
 }
 
-[data-theme="dark"] .neuromorphic-countdown {
-    box-shadow: 5px 5px 10px var(--shadow-color),
-                -5px -5px 10px rgba(255, 255, 255, 0.1);
-}
-
 .list-group-item {
     background: transparent;
     border: none;
@@ -192,8 +194,9 @@ body {
     }
 
     .neuromorphic-countdown {
-        font-size: 1rem;
-        padding: 8px 12px;
+        font-size: 0.9rem;
+        padding: 6px 12px;
+        height: 34px; /* Slightly smaller for mobile */
     }
 
     .main-content {
