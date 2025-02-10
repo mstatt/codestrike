@@ -213,7 +213,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="adminLoginForm">
+                    <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
                         <div class="mb-3">
                             <label for="adminEmail" class="form-label">Email</label>
                             <input type="email" class="form-control neuromorphic-input" id="adminEmail" required>

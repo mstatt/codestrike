@@ -255,7 +255,7 @@ function handleAdminLogin(event) {
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
-                // Load registered emails
+                // Load registered emails and winners
                 loadRegisteredEmails();
                 loadAdminWinners();
 
