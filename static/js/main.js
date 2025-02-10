@@ -107,7 +107,7 @@ function initializeCountdown() {
 
                 if (distance < 0) {
                     clearInterval(timer);
-                    document.getElementById('countdown').innerHTML = "DEADLINE PASSED";
+                    document.getElementById('countdown').innerHTML = "Ended";
                     document.querySelector('button[type="submit"]').disabled = true;
                 }
             }, 1000);
