@@ -27,7 +27,20 @@
     </header>
 
     <main class="flex-grow-1 container main-content">
-        <div id="alertContainer" class="position-fixed top-50 start-50 translate-middle" style="z-index: 1050;"></div>
+        <div id="alertContainer" class="position-fixed top-0 start-50 translate-middle-x mt-5" style="z-index: 1050; width: 90%; max-width: 800px;"></div>
+
+        <!-- Hackathon Ended Message -->
+        <div id="hackathonEndedMessage" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0 d-none">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card neuromorphic">
+                    <div class="card-body text-center">
+                        <h2 class="mb-4">Hackathon Ended</h2>
+                        <p class="mb-3">The last hackathon ended on <span id="endDate"></span>.</p>
+                        <p>Please keep checking back for our next event!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Submission Form -->
         <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">

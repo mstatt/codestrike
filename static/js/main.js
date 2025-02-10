@@ -74,9 +74,10 @@ function showAlert(message, type = 'danger') {
     const alertContainer = document.getElementById('alertContainer');
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
     alert.innerHTML = `
         ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
     alertContainer.appendChild(alert);
 
@@ -91,11 +92,34 @@ function initializeCountdown() {
     fetch('/get_deadline')
         .then(response => response.json())
         .then(data => {
-            const deadline = new Date(data.deadline).getTime();
+            const deadline = new Date(data.deadline);
+            const deadlineTime = deadline.getTime();
+
+            // Format the deadline date for display
+            const formattedDeadline = deadline.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
             const timer = setInterval(() => {
                 const now = new Date().getTime();
-                const distance = deadline - now;
+                const distance = deadlineTime - now;
+
+                if (distance < 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').innerHTML = "Ended";
+                    document.getElementById('submissionForm').classList.add('d-none');
+
+                    // Show hackathon ended message
+                    const endedMessage = document.getElementById('hackathonEndedMessage');
+                    endedMessage.classList.remove('d-none');
+                    document.getElementById('endDate').textContent = formattedDeadline;
+
+                    return;
+                }
 
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -104,12 +128,6 @@ function initializeCountdown() {
 
                 document.getElementById('countdown').innerHTML =
                     `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-                if (distance < 0) {
-                    clearInterval(timer);
-                    document.getElementById('countdown').innerHTML = "Ended";
-                    document.querySelector('button[type="submit"]').disabled = true;
-                }
             }, 1000);
         })
         .catch(error => {
