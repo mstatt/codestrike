@@ -116,7 +116,7 @@ body {
 }
 
 .modal {
-    z-index: 1055;
+    z-index: 1060;  /* Increased z-index to be higher than backdrop */
 }
 
 .modal-backdrop {
@@ -127,6 +127,8 @@ body {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    position: relative;  /* Add relative positioning */
+    z-index: 1;  /* Ensure content is above any nested elements */
 }
 
 .modal-header, .modal-footer {
