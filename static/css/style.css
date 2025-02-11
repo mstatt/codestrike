@@ -65,22 +65,25 @@ body {
     margin-right: 10px;
 }
 
-.neuromorphic-countdown {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    padding: 8px 15px;
-    border-radius: 9999px;
-    display: inline-flex;
+.header-buttons {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    background: var(--card-bg);
-    box-shadow: 0 4px 15px rgba(150, 15, 27, 0.1);
-    height: 38px;
-    white-space: nowrap;
-    min-width: min-content;
-    border: 1px solid rgba(150, 15, 27, 0.2);
+    gap: 1rem;
 }
+
+.header-menu-btn {
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.header-menu-btn:hover {
+    opacity: 1;
+}
+
+.header-menu-btn .bi-list {
+    font-size: 1.5rem;
+}
+
 
 .main-content {
     padding: 2rem 0;
@@ -91,12 +94,6 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-}
-
-.header-buttons {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
 }
 
 .neuromorphic {
@@ -267,12 +264,6 @@ body {
         align-items: center;
         gap: 1rem;
     }
-
-    .neuromorphic-countdown {
-        font-size: 0.9rem;
-        padding: 6px 12px;
-        height: 34px;
-    }
 }
 
 @media (max-width: 576px) {
@@ -336,7 +327,6 @@ body {
     color: white;
 }
 
-/* Styles from edited snippet */
 .submission-buttons-group {
     position: relative;
     overflow: hidden;
@@ -375,7 +365,6 @@ body {
     margin-left: 0;
 }
 
-/* Add these styles for the winners list */
 #winnersList .list-group-item {
     background: rgba(22, 24, 28, 0.7);
     border: 1px solid var(--primary-color);
@@ -404,7 +393,6 @@ body {
     margin-bottom: 0;
 }
 
-/* Update modal transition for smoother opening/closing */
 .modal.fade .modal-dialog {
     transition: transform 0.2s ease-out;
 }
