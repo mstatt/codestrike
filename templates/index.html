@@ -34,6 +34,11 @@
                                 </button>
                             </li>
                             <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                                    <i class="bi bi-award me-2"></i>Judging Criteria
+                                </button>
+                            </li>
+                            <li>
                                 <button class="dropdown-item {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}disabled{% endif %}" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#submitProjectModal"
@@ -256,9 +261,6 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-lg" onclick="previewSubmission()">Preview Submission</button>
-                            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#criteriaModal">
-                                View Judging Criteria
-                            </button>
                         </div>
                     </form>
                     {% endif %}
@@ -573,47 +575,3 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
-<div class="modal fade" id="termsModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content neuromorphic">
-            <div class="modal-header">
-                <h5 class="modal-title">Terms and Conditions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="terms-content">
-                    <h6 class="mb-3">1. Eligibility</h6>
-                    <p>Participants must be at least 18 years old or have guardian consent. Teams can consist of 1-4 members.</p>
-
-                    <h6 class="mb-3">2. Submission Guidelines</h6>
-                    <ul class="list-unstyled mb-4">
-                        <li>• All code must be original and created during the hackathon period</li>
-                        <li>• Use of open source libraries and APIs is allowed with proper attribution</li>
-                        <li>• Projects must be submitted before the deadline</li>
-                        <li>• Each team must submit a working demo and documentation</li>
-                    </ul>
-
-                    <h6 class="mb-3">3. Intellectual Property</h6>
-                    <p>Participants retain ownership of their code but grant organizers the right to review and share submissions for promotional purposes.</p>
-
-                    <h6 class="mb-3">4. Judging Process</h6>
-                    <p>Projects will be evaluated based on innovation, technical complexity, completeness, practical application, and presentation quality. All judging decisions are final.</p>
-
-                    <h6 class="mb-3">5. Prize Distribution</h6>
-                    <ul class="list-unstyled mb-4">
-                        <li>• Winners will be announced within 7 days of hackathon end</li>
-                        <li>• Prizes will be distributed within 30 days of winning</li>
-                        <li>• Winners must complete required tax documentation</li>
-                        <li>• Prizes are paid in USD via secure bank transfer</li>
-                    </ul>
-
-                    <h6 class="mb-3">6. Code of Conduct</h6>
-                    <p>Participants must maintain professional conduct throughout the event. Any form of harassment, discrimination, or unethical behavior will result in immediate disqualification.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
