@@ -14,18 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add admin-related event listeners
     const adminLoginForm = document.getElementById('adminLoginForm');
     if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-
-            if (!email || !password) {
-                showAlert('Please fill in all fields', 'danger');
-                return;
-            }
-
-            handleAdminLogin(event);
-        });
+        adminLoginForm.addEventListener('submit', handleAdminLogin);
     }
 
     // Add event listener for winners modal
@@ -216,8 +205,19 @@ function loadSubmissions() {
 }
 
 function handleAdminLogin(event) {
-    const formData = new FormData(event.target);
-    const adminModal = document.getElementById('adminModal');
+    event.preventDefault();
+
+    const email = document.querySelector('#adminLoginForm input[name="email"]').value;
+    const password = document.querySelector('#adminLoginForm input[name="password"]').value;
+
+    if (!email || !password) {
+        showAlert('Please fill in all fields', 'danger');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
 
     fetch('/admin/login', {
         method: 'POST',
@@ -226,10 +226,10 @@ function handleAdminLogin(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const modal = bootstrap.Modal.getInstance(adminModal);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
             if (modal) {
                 modal.hide();
-                event.target.reset();
+                document.getElementById('adminLoginForm').reset();
                 showAlert('Successfully logged in as admin', 'success');
 
                 // Refresh the page after successful login
