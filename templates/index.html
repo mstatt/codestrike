@@ -24,16 +24,6 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
-                                <button class="dropdown-item" onclick="document.querySelector('.hackathon-image-container').scrollIntoView({behavior: 'smooth'})">
-                                    <i class="bi bi-info-circle me-2"></i>Hackathon Details
-                                </button>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" onclick="toggleTheme()">
-                                    <i class="bi bi-moon-fill me-2"></i>Toggle Theme
-                                </button>
-                            </li>
-                            <li>
                                 <button class="dropdown-item" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
                                     <i class="bi bi-collection me-2"></i>All Submissions
                                 </button>
@@ -44,6 +34,7 @@
                                         data-bs-target="#submitProjectModal"
                                         {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
                                         title="Submission deadline has passed"
+                                        disabled
                                         {% endif %}>
                                     <i class="bi bi-upload me-2"></i>Submit Project
                                 </button>
