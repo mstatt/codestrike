@@ -207,8 +207,8 @@ function loadSubmissions() {
 function handleAdminLogin(event) {
     event.preventDefault();
 
-    const email = document.querySelector('#adminLoginForm input[name="email"]').value;
-    const password = document.querySelector('#adminLoginForm input[name="password"]').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
     if (!email || !password) {
         showAlert('Please fill in all fields', 'danger');

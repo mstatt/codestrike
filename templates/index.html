@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Update header section -->
     <header class="fixed-top header-shadow">
         <div class="container py-3">
             <div class="header-content">
@@ -17,14 +18,20 @@
                     <h1 class="mb-0 fw-bold h4">FALCONS.AI Codestrike</h1>
                 </div>
                 <div class="header-buttons">
+                    <div id="countdown" class="neuromorphic-countdown me-3"></div>
                     <div class="dropdown">
-                        <button class="btn" type="button" id="headerMenuButton" data-bs-toggle="dropdown">
+                        <button class="btn" type="button" id="headerMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-list"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headerMenuButton">
+                        <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#submissionFormModal">
-                                    <i class="bi bi-upload me-2"></i>Submit Project
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#hackathonDetailsModal">
+                                    <i class="bi bi-info-circle me-2"></i>Hackathon Details
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="toggleTheme()">
+                                    <i class="bi bi-moon-fill me-2"></i>Toggle Theme
                                 </button>
                             </li>
                             <li>
@@ -49,160 +56,87 @@
         </div>
     </header>
 
-    <main class="container main-content">
+    <main class="flex-grow-1 container main-content">
         <div id="alertContainer"></div>
-        <div id="hackathonDetailsView" class="row justify-content-center w-100">
-            <div class="col-12 col-lg-10">
+
+        <!-- Hackathon Ended Message -->
+        <div id="hackathonEndedMessage" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0 d-none">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card neuromorphic">
+                    <div class="card-body text-center">
+                        <h2 class="mb-4">Hackathon Ended</h2>
+                        <p class="mb-3">The last hackathon ended on <span id="endDate"></span>.</p>
+                        <p>Please keep checking back for our next event!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Form -->
+        <div id="submissionForm" class="row justify-content-center w-100 flex-grow-1 align-items-center m-0">
+            <div class="col-12 col-md-8 col-lg-6">
                 <div class="card neuromorphic">
                     <div class="card-body">
-                        <div class="mb-4">
-                            <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
-                                 class="img-fluid rounded w-100" 
-                                 alt="Hackathon Banner"
-                                 style="max-height: 300px; object-fit: contain;">
-                        </div>
-                        <h4 class="mb-4">{{ hackathon_details.get('title', 'FALCONS.AI Hack-a-thon') }}</h4>
-                        <h6 class="mb-3">About the Event</h6>
-                        <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology!') }}</p>
-                        <div class="card neuromorphic mb-4">
-                            <div class="card-body text-center">
-                                <h5 class="mb-4">Project Submission Deadline</h5>
-                                <p class="deadline-display h4 mb-3"></p>
-                            </div>
-                        </div>
-                        <h6 class="mb-3">Prizes</h6>
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <div class="card neuromorphic h-100">
-                                    <div class="card-body text-center">
-                                        <h5>🥇 First Place</h5>
-                                        <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card neuromorphic h-100">
-                                    <div class="card-body text-center">
-                                        <h5>🥈 Second Place</h5>
-                                        <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card neuromorphic h-100">
-                                    <div class="card-body text-center">
-                                        <h5>🥉 Third Place</h5>
-                                        <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <h6 class="mb-3">Rules & Requirements</h6>
-                        <ul class="list-group list-group-flush mb-4">
-                            {% for rule in hackathon_details.get('rules', [
-                                'Teams must consist of 1-4 members',
-                                'All code must be original and created during the hackathon',
-                                'Use of open source libraries and APIs is allowed',
-                                'Projects must be submitted before the deadline',
-                                'Each team must submit a working demo and documentation'
-                            ]) %}
-                            <li class="list-group-item">{{ rule }}</li>
-                            {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modals -->
-        <div class="modal fade" id="submissionFormModal" tabindex="-1" aria-labelledby="submissionFormModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="submissionFormModalLabel">Submit Your Project</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
                         <form id="projectSubmissionForm" class="needs-validation" novalidate>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" required>
+                            <div class="mb-4">
+                                <label for="email" class="form-label">Team Email</label>
+                                <div class="input-group">
+                                    <input type="email" class="form-control neuromorphic-input" id="email" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="mb-3">
+                            <!-- Update submission form to include Project Name -->
+                            <div class="mb-4">
                                 <label for="team_name" class="form-label">Team Name</label>
-                                <input type="text" class="form-control" id="team_name" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control neuromorphic-input" id="team_name" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="project_name" class="form-label">Project Name</label>
-                                <input type="text" class="form-control" id="project_name" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control neuromorphic-input" id="project_name" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="github" class="form-label">GitHub Repo</label>
-                                <input type="url" class="form-control" id="github" required>
+                                <div class="input-group">
+                                    <input type="url" class="form-control neuromorphic-input" id="github" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="video" class="form-label">Demo Video</label>
-                                <input type="url" class="form-control" id="video" required>
+                                <div class="input-group">
+                                    <input type="url" class="form-control neuromorphic-input" id="video" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="live_demo_url" class="form-label">Live Demo URL</label>
-                                <input type="url" class="form-control" id="live_demo_url" required>
+                                <div class="input-group">
+                                    <input type="url" class="form-control neuromorphic-input" id="live_demo_url" required>
+                                    <span class="input-group-text validation-icon"></span>
+                                </div>
                             </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Submit Project</button>
+                            <div class="mb-4">
+                                <label class="form-label">Demo Credentials (Optional)</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <input type="text" class="form-control neuromorphic-input" id="demo_username" placeholder="Username">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <input type="password" class="form-control neuromorphic-input" id="demo_password" placeholder="Password">
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="submissionsModal" tabindex="-1" aria-labelledby="submissionsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="submissionsModalLabel">All Submissions</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="list-group" id="submissionsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="winnersModal" tabindex="-1" aria-labelledby="winnersModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="winnersModalLabel">Winners</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="list-group" id="winnersList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="adminModalLabel">Admin Login</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="adminLoginForm">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Login</button>
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-lg" onclick="previewSubmission()">Preview Submission</button>
+                                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                                    View Judging Criteria
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -210,6 +144,415 @@
             </div>
         </div>
     </main>
+
+    <!-- Preview Submission Modal -->
+    <div class="modal fade" id="previewSubmissionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Preview Submission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-content">
+                        <h6>Team Information</h6>
+                        <div class="mb-3">
+                            <strong>Team Email:</strong> <span id="previewEmail"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Team Name:</strong> <span id="previewTeamName"></span>
+                        </div>
+                        <h6>Project Details</h6>
+                        <div class="mb-3">
+                            <strong>Project Name:</strong> <span id="previewProjectName"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>GitHub Repository:</strong> 
+                            <a id="previewGithub" href="#" target="_blank"></a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Demo Video:</strong>
+                            <a id="previewVideo" href="#" target="_blank"></a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Live Demo URL:</strong>
+                            <a id="previewLiveDemo" href="#" target="_blank"></a>
+                        </div>
+                        <div id="previewCredentials" class="mb-3 d-none">
+                            <h6>Demo Credentials</h6>
+                            <div class="mb-2">
+                                <strong>Username:</strong> <span id="previewUsername"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Password:</strong> <span id="previewPassword"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">Edit</button>
+                    <button type="button" class="btn btn-primary" onclick="submitFinalProject()">Submit Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-bottom footer-shadow">
+        <div class="container py-3">
+            <div class="text-center">
+                <p class="mb-0 text-muted">Copyright @2025 by FALCONS.AI</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Judging Criteria Modal -->
+    <div class="modal fade" id="criteriaModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Judging Criteria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Innovation and Creativity (30%)</li>
+                        <li class="list-group-item">Technical Complexity (25%)</li>
+                        <li class="list-group-item">Completeness and Polish (20%)</li>
+                        <li class="list-group-item">Practical Application (15%)</li>
+                        <li class="list-group-item">Presentation Quality (10%)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions Modal -->
+    <div class="modal fade" id="submissionsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">All Submissions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group" id="submissionsList">
+                        <!-- Submissions will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Winners Modal -->
+    <div class="modal fade" id="winnersModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Winners List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group" id="winnersList">
+                        <!-- Winners will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Admin Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Admin Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                        <div class="mb-3">
+                            <label for="adminEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control neuromorphic-input" id="adminEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control neuromorphic-input" id="adminPassword" required>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Admin Panel Modal width -->
+    <div class="modal fade" id="adminPanelModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 90%;">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Admin Panel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Basic Administration</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">User Management</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="winners-tab" data-bs-toggle="tab" data-bs-target="#winners" type="button" role="tab">Winners Management</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="adminTabContent">
+                        <!-- Basic Administration Tab -->
+                        <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                            <form id="adminUpdateForm" onsubmit="handleAdminUpdate(event)">
+                                <div class="mb-3">
+                                    <label for="newDeadline" class="form-label">Update Deadline</label>
+                                    <input type="datetime-local" class="form-control neuromorphic-input" id="newDeadline" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonLogo" class="form-label">Update Hackathon Logo</label>
+                                    <input type="file" class="form-control neuromorphic-input" id="hackathonLogo" accept="image/*">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonTitle" class="form-label">Hackathon Title</label>
+                                    <input type="text" class="form-control neuromorphic-input" id="hackathonTitle">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonDescription" class="form-label">About the Event</label>
+                                    <textarea class="form-control neuromorphic-input" id="hackathonDescription" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hackathonRules" class="form-label">Rules & Requirements</label>
+                                    <textarea class="form-control neuromorphic-input" id="hackathonRules" rows="5" placeholder="Enter each rule on a new line"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Prizes</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="firstPrize" placeholder="First Place Prize">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="secondPrize" placeholder="Second Place Prize">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="thirdPrize" placeholder="Third Place Prize">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn">Update Hackathon Details</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- User Management Tab -->
+                        <div class="tab-pane fade" id="users" role="tabpanel">
+                            <div class="mb-4">
+                                <label class="form-label">Teams Management</label>
+                                <div class="table-responsive">
+                                    <table class="table table-dark" id="teamsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Team Name</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="teamsTableBody">
+                                            <!-- Teams will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="input-group mt-3">
+                                    <input type="text" class="form-control neuromorphic-input" id="newTeamName" placeholder="Add new team">
+                                    <button type="button" class="btn" onclick="addNewTeam()">Add Team</button>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Registered Emails</label>
+                                <div class="table-responsive">
+                                    <table class="table table-dark" id="emailsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Email</th>
+                                                <th>Team</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="emailsTableBody">
+                                            <!-- Emails will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="input-group mt-3">
+                                    <input type="email" class="form-control neuromorphic-input" id="newEmail" placeholder="Add new email">
+                                    <button type="button" class="btn" onclick="addNewEmail()">Add</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Winners Management Tab -->
+                        <div class="tab-pane fade" id="winners" role="tabpanel">
+                            <div class="mb-4">
+                                <div class="table-responsive">
+                                    <table class="table table-dark" id="winnersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Team Name</th>
+                                                <th>Project Name</th>
+                                                <th>Points</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="winnersTableBody">
+                                            <!-- Winners will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <form id="addWinnerForm" class="mt-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="newTeamName" placeholder="Team Name" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control neuromorphic-input" id="newProjectName" placeholder="Project Name" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" class="form-control neuromorphic-input" id="newPoints" placeholder="Points" required min="0" max="100">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn w-100">Add</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn" onclick="adminLogout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Hackathon Details Modal -->
+    <div class="modal fade" id="hackathonDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 1000px; width: 95%;">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">FALCONS.AI Hackathon Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Add responsive image container -->
+                            <div class="hackathon-image-container mb-4">
+                                <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
+                                     class="img-fluid rounded w-100" 
+                                     alt="Hackathon Banner"
+                                     style="max-height: 300px; object-fit: contain;">
+                            </div>
+
+                            <h6 class="mb-3">About the Event</h6>
+                            <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Codestrike brings together creative minds to build groundbreaking solutions. This is your chance to showcase your skills, collaborate with talented developers, and create impactful projects that could shape the future.') }}</p>
+
+                            <h6 class="mb-3 mt-4">Timeline</h6>
+                            <div class="card neuromorphic mb-4">
+                                <div class="card-body">
+                                    <div class="deadline-info">
+                                        <h5 class="text-center mb-4">Project Submission Deadline</h5>
+                                        <p class="text-center deadline-display h4 mb-3"></p>
+                                        <p class="text-center text-muted small">
+                                            All project submissions must be completed before this deadline
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ul class="list-group list-group-flush mb-4">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Winners Announcement</span>
+                                    <span>Within 7 days after deadline</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Prize Distribution</span>
+                                    <span>Within 30 days of winning</span>
+                                </li>
+                            </ul>
+
+                            <h6 class="mb-3">Prizes</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥇 First Place</h5>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥈 Second Place</h5>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card neuromorphic h-100">
+                                        <div class="card-body text-center">
+                                            <h5>🥉 Third Place</h5>
+                                            <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
+                                            <small class="text-muted">Payout within 30 days of winning</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card neuromorphic mb-4">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Prize Information</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">💰 All prizes are paid in USD</li>
+                                        <li class="mb-2">📅 Winners announced within 7 days of hackathon end</li>
+                                        <li class="mb-2">🏦 Payments processed via secure bank transfer</li>
+                                        <li class="mb-2">📝 Winners must complete W-8/W-9 tax forms</li>
+                                        <li>✉️ Payment details will be collected via email</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3">Rules & Requirements</h6>
+                            <ul class="list-group list-group-flush mb-4">
+                                {% for rule in hackathon_details.get('rules', [
+                                    'Teams must consist of 1-4 members',
+                                    'All code must be original and created during the hackathon',
+                                    'Use of open source libraries and APIs is allowed',
+                                    'Projects must be submitted before the deadline',
+                                    'Each team must submit a working demo and documentation'
+                                ]) %}
+                                <li class="list-group-item">{{ rule }}</li>
+                                {% endfor %}
+                            </ul>
+
+                            <h6 class="mb-3">Contact</h6>
+                            <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
