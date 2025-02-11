@@ -39,11 +39,13 @@
                                     <i class="bi bi-upload me-2"></i>Submit Project
                                 </button>
                             </li>
+                            {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
                             <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#winnersModal">
                                     <i class="bi bi-trophy me-2"></i>Winners
                                 </button>
                             </li>
+                            {% endif %}
                             <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#adminModal">
                                     <i class="bi bi-shield-lock me-2"></i>Admin
@@ -305,7 +307,12 @@
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="termsCheck" required>
                             <label class="form-check-label" for="termsCheck">
-                                I agree to the terms of service and confirm that I am legally capable of participating in this hackathon.
+                                I agree to the terms of service and confirm that I am legally capable of participating in this hackathon. 
+                                <a href="#" data-bs-toggle="popover" data-bs-trigger="click" 
+                                   data-bs-title="Terms and Conditions" 
+                                   data-bs-content="By participating in this hackathon, you agree to: 1) Submit only original work created during the hackathon period. 2) Follow all competition rules and guidelines. 3) Grant organizers the right to review and share your submission. 4) Be at least 18 years old or have guardian consent. 5) Accept judges' decisions as final.">
+                                    Terms and Conditions
+                                </a>
                             </label>
                         </div>
                     </div>
