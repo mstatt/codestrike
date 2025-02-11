@@ -195,14 +195,15 @@ function handleAdminLogin(event) {
             const adminLoginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
             adminLoginModal.hide();
 
+            // Show admin panel modal
+            const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
+            adminPanelModal.show();
+
             // Show success message
-            showAlert('Successfully logged in as admin', 'success');
+            showAlert('Logged in successfully. Welcome to the admin panel!', 'success');
 
-            // Reset the form
+            // Reset the login form
             event.target.reset();
-
-            // Redirect or show admin interface here
-            window.location.href = '/admin-dashboard';
         } else {
             showAlert(data.message || 'Invalid credentials', 'danger');
         }
