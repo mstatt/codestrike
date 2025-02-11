@@ -315,6 +315,19 @@ function previewSubmission() {
         credentialsSection.classList.add('d-none');
     }
 
+    // Reset terms checkbox and submit button state
+    const termsCheck = document.getElementById('termsCheck');
+    const submitBtn = document.getElementById('submitProjectBtn');
+    if (termsCheck && submitBtn) {
+        termsCheck.checked = false;
+        submitBtn.disabled = true;
+
+        // Add event listener for checkbox
+        termsCheck.addEventListener('change', function() {
+            submitBtn.disabled = !this.checked;
+        });
+    }
+
     // Show preview modal
     const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
     previewModal.show();
@@ -932,7 +945,7 @@ function loadWinners() {
                 // Add trophy emoji for top 3
                 let trophyIcon = '';
                 if (index === 0) trophyIcon = '🏆 ';
-                else if (index === 1) trophyIcon = '🥈 ';
+                else if (index === 1) trophyIcon = ''🥈 ';
                 else if (index === 2) trophyIcon = '🥉 ';
 
                 item.innerHTML = `
@@ -942,7 +955,7 @@ function loadWinners() {
                             <p class="mb-1">${winner.project_name}</p>
                             <p class="mb-1">Points: ${winner.points}</p>
                         </div>
-                        <<span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
                 `;
                 winnersList.appendChild(item);

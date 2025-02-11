@@ -302,11 +302,19 @@
                                 <strong>Password:</strong> <span id="previewPassword"></span>
                             </div>
                         </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                I agree to the terms of service and confirm that I am legally capable of participating in this hackathon.
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" data-bs-dismiss="modal">Edit</button>
-                    <button type="button" class="btn btn-primary" onclick="submitFinalProject()">Submit Project</button>
+                    <button type="button" class="btn btn-primary" id="submitProjectBtn" onclick="submitFinalProject()" disabled>
+                        Submit Project
+                    </button>
                 </div>
             </div>
         </div>
