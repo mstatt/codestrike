@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add admin-related event listeners
     const adminLoginForm = document.getElementById('adminLoginForm');
     if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', handleAdminLogin);
+        adminLoginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            handleAdminLogin(event);
+        });
     }
 
     // Add event listener for winners modal
@@ -52,14 +55,16 @@ function initializeCountdown() {
     fetch('/get_deadline')
         .then(response => response.json())
         .then(data => {
+            const countdown = document.getElementById('countdown');
+
             if (!data.deadline) {
-                document.getElementById('countdown').innerHTML = "No deadline set";
+                if (countdown) countdown.innerHTML = "No deadline set";
                 return;
             }
 
             const deadline = new Date(data.deadline);
             if (isNaN(deadline.getTime())) {
-                document.getElementById('countdown').innerHTML = "Invalid deadline";
+                if (countdown) countdown.innerHTML = "Invalid deadline";
                 return;
             }
 
@@ -70,10 +75,10 @@ function initializeCountdown() {
 
                 if (distance < 0) {
                     clearInterval(timer);
-                    document.getElementById('countdown').innerHTML = "Ended";
-                    const submissionForm = document.getElementById('submissionForm');
-                    if (submissionForm) {
-                        submissionForm.classList.add('d-none');
+                    if (countdown) countdown.innerHTML = "Ended";
+                    const submissionFormModal = document.getElementById('submissionFormModal');
+                    if (submissionFormModal) {
+                        submissionFormModal.classList.add('d-none');
                     }
                     return;
                 }
@@ -83,23 +88,24 @@ function initializeCountdown() {
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                const countdownElement = document.getElementById('countdown');
-                if (countdownElement) {
-                    countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                if (countdown) {
+                    countdown.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
                 }
             }, 1000);
         })
         .catch(error => {
             console.error('Error fetching deadline:', error);
-            const countdownElement = document.getElementById('countdown');
-            if (countdownElement) {
-                countdownElement.innerHTML = "Error loading deadline";
+            const countdown = document.getElementById('countdown');
+            if (countdown) {
+                countdown.innerHTML = "Error loading deadline";
             }
         });
 }
 
 function showAlert(message, type = 'danger') {
     const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) return;
+
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} alert-dismissible fade show`;
     alert.role = 'alert';
@@ -128,6 +134,11 @@ function handleSubmission(event) {
         if (data.success) {
             showAlert(data.message, 'success');
             event.target.reset();
+
+            // Close the modal after successful submission
+            const modal = bootstrap.Modal.getInstance(document.getElementById('submissionFormModal'));
+            if (modal) modal.hide();
+
             loadSubmissions();
         } else {
             showAlert(data.message, 'danger');
@@ -147,7 +158,13 @@ function loadSubmissions() {
             if (!submissionsList) return;
 
             submissionsList.innerHTML = '';
-            data.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+            if (!data.submissions || data.submissions.length === 0) {
+                submissionsList.innerHTML = '<div class="text-center">No submissions yet.</div>';
+                return;
+            }
+
+            data.submissions
+                .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
                 .forEach(submission => {
                     const submissionDate = new Date(submission.submitted_at).toLocaleString();
                     const item = document.createElement('div');
@@ -175,7 +192,6 @@ function loadSubmissions() {
 }
 
 function handleAdminLogin(event) {
-    event.preventDefault();
     const formData = new FormData(event.target);
 
     fetch('/admin/login', {
@@ -185,8 +201,8 @@ function handleAdminLogin(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const loginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
-            loginModal.hide();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
+            if (modal) modal.hide();
             showAlert('Successfully logged in', 'success');
             event.target.reset();
         } else {
