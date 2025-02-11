@@ -296,12 +296,15 @@ body {
 }
 
 .btn-close {
-    filter: invert(15%) sepia(95%) saturate(6932%) hue-rotate(358deg) brightness(95%) contrast(112%) !important;
-    opacity: 1 !important;
+    background-color: transparent;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    cursor: pointer;
 }
 
 .btn-close:hover {
-    opacity: 0.75 !important;
+    opacity: 0.8;
 }
 
 .email-text {
@@ -320,4 +323,40 @@ body {
     --shadow-color: rgba(0, 0, 0, 0.1);
     --text-color: #0f1419;
     --card-bg: #f7f9f9;
+}
+
+.card {
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 1rem;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.card.show {
+    display: block !important;
+    animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header {
+    background: rgba(22, 24, 28, 0.7);
+    border-bottom: 1px solid var(--primary-color);
+    padding: 1rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    color: white;
 }
