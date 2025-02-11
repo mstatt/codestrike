@@ -1,16 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize bootstrap components
+    // Initialize bootstrap modals
     var modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
-        new bootstrap.Modal(modal, {
-            backdrop: true,
-            keyboard: true
-        });
+        new bootstrap.Modal(modal);
     });
-
-    // Initialize the page
-    updateHackathonDeadlines();
-    initializeCountdown();
 
     // Form validation
     const projectSubmissionForm = document.getElementById('projectSubmissionForm');
@@ -40,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (winnersModal) {
         winnersModal.addEventListener('show.bs.modal', loadWinners);
     }
+
+    // Initialize the page
+    updateHackathonDeadlines();
+    initializeCountdown();
 
     // Ensure proper modal cleanup on hide
     document.querySelectorAll('.modal').forEach(modal => {

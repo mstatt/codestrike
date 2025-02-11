@@ -27,7 +27,6 @@ body {
     background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 1030;
     color: white;
 }
 
@@ -47,7 +46,6 @@ body {
 .main-content {
     padding: 2rem 0;
     position: relative;
-    z-index: 1;
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     display: flex;
     flex-direction: column;
@@ -115,39 +113,10 @@ body {
     text-align: center;
 }
 
-.modal {
-    z-index: 1055 !important;
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.modal-backdrop {
-    display: none !important;
-}
-
 .modal-content {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    position: relative;
-    pointer-events: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-}
-
-.modal-dialog {
-    position: relative;
-    pointer-events: none;
-    max-width: 500px;
-    margin: 1.75rem auto;
-    transform: translate(0, 0) !important;
-}
-
-.modal.fade .modal-dialog {
-    transition: transform 0.2s ease-out;
-    transform: translate(0, -50px);
-}
-
-.modal.show .modal-dialog {
-    transform: none !important;
 }
 
 .modal-header, .modal-footer {
@@ -196,10 +165,7 @@ body {
 }
 
 .form-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: white;
-    margin-bottom: 8px;
+    color: var(--text-color);
 }
 
 .validation-icon {
@@ -329,6 +295,20 @@ body {
     background: rgba(22, 24, 28, 0.7);
     border: 1px solid var(--primary-color);
     color: white;
+}
+
+
+.form-control {
+    background: var(--card-bg);
+    border: 1px solid var(--primary-color);
+    color: var(--text-color);
+}
+
+.form-control:focus {
+    background: var(--card-bg);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(150, 15, 27, 0.25);
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
