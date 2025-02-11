@@ -39,7 +39,12 @@
                                 </button>
                             </li>
                             <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#submitProjectModal">
+                                <button class="dropdown-item {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}disabled{% endif %}" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#submitProjectModal"
+                                        {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
+                                        title="Submission deadline has passed"
+                                        {% endif %}>
                                     <i class="bi bi-upload me-2"></i>Submit Project
                                 </button>
                             </li>
@@ -191,6 +196,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
+                    <div class="alert alert-warning text-center mb-4">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        The submission deadline has passed. No new submissions are being accepted.
+                    </div>
+                    {% else %}
                     <form id="projectSubmissionForm" class="needs-validation" novalidate>
                         <div class="mb-4">
                             <label for="email" class="form-label">Team Email</label>
@@ -252,6 +263,7 @@
                             </button>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

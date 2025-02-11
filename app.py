@@ -11,6 +11,16 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.secret_key = "a_much_stronger_secret_key"
 
+# Add custom datetime filter
+@app.template_filter('parse_datetime')
+def parse_datetime(date_string):
+    if not date_string:
+        return None
+    try:
+        return datetime.strptime(date_string, '%m/%d/%Y, %I:%M:%S %p')
+    except ValueError:
+        return None
+
 SUBMISSIONS_FILE = 'submissions.json'
 USERS_AND_TEAMS_FILE = 'users_and_teams.json'
 ADMIN_CREDENTIALS_FILE = 'admin_credentials.txt'
@@ -107,7 +117,9 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     hackathon_details = load_hackathon_details()
-    return render_template('index.html', hackathon_details=hackathon_details)
+    return render_template('index.html', 
+                         hackathon_details=hackathon_details,
+                         now=datetime.now())
 
 @app.route('/verify_email', methods=['POST'])
 def verify_email():
