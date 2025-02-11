@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         new bootstrap.Modal(modal, {
-            backdrop: 'static',
-            keyboard: false
+            backdrop: true,
+            keyboard: true
         });
     });
 

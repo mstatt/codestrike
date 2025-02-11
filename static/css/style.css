@@ -117,10 +117,11 @@ body {
 
 .modal {
     z-index: 1055 !important;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal-backdrop {
-    z-index: 1050 !important;
+    display: none !important;
 }
 
 .modal-content {
@@ -129,6 +130,7 @@ body {
     border-radius: 16px;
     position: relative;
     pointer-events: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .modal-dialog {
@@ -136,6 +138,7 @@ body {
     pointer-events: none;
     max-width: 500px;
     margin: 1.75rem auto;
+    transform: translate(0, 0) !important;
 }
 
 .modal.fade .modal-dialog {
@@ -144,7 +147,7 @@ body {
 }
 
 .modal.show .modal-dialog {
-    transform: none;
+    transform: none !important;
 }
 
 .modal-header, .modal-footer {
@@ -288,10 +291,6 @@ body {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;
     margin-bottom: 0;
-}
-
-.modal.fade .modal-dialog {
-    transition: transform 0.2s ease-out;
 }
 
 .alert-success {
