@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize bootstrap components
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        new bootstrap.Modal(modal, {
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
+
     // Initialize the page
     updateHackathonDeadlines();
     initializeCountdown();
@@ -23,6 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (winnersModal) {
         winnersModal.addEventListener('show.bs.modal', loadWinners);
     }
+
+    // Ensure proper modal cleanup on hide
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function() {
+            const forms = this.querySelectorAll('form');
+            forms.forEach(form => form.reset());
+            const alerts = this.querySelectorAll('.alert');
+            alerts.forEach(alert => alert.remove());
+        });
+    });
 });
 
 function updateHackathonDeadlines() {

@@ -116,17 +116,35 @@ body {
 }
 
 .modal {
-    z-index: 1055;
+    z-index: 1055 !important;
 }
 
 .modal-backdrop {
-    z-index: 1050;
+    z-index: 1050 !important;
 }
 
 .modal-content {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    position: relative;
+    pointer-events: auto;
+}
+
+.modal-dialog {
+    position: relative;
+    pointer-events: none;
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 0.2s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
 }
 
 .modal-header, .modal-footer {
