@@ -270,7 +270,6 @@ function showAlert(message, type = 'danger') {
     }, 5000);
 }
 
-
 function previewSubmission() {
     // Get all form values
     const email = document.getElementById('email').value;
@@ -940,12 +939,10 @@ function loadWinners() {
 
             data.winners.forEach((winner, index) => {
                 const item = document.createElement('div');
-                item.className = 'list-group-item neuromorphic mb-2';
-
-                // Add trophy emoji for top 3
+                item.className = 'list-group-item neuromorphic mb-2';                // Add trophy emoji for top 3
                 let trophyIcon = '';
                 if (index === 0) trophyIcon = '🏆 ';
-                else if (index === 1) trophyIcon = ''🥈 ';
+                else if (index === 1) trophyIcon = '🥈 ';
                 else if (index === 2) trophyIcon = '🥉 ';
 
                 item.innerHTML = `
@@ -1915,3 +1912,13 @@ function editTeam(button) {
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
     }
 }
+// Add event listener to form
+document.addEventListener('DOMContentLoaded', function() {
+    const submitForm = document.getElementById('projectSubmissionForm');
+    if (submitForm) {
+        submitForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            previewSubmission();
+        });
+    }
+});
