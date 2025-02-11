@@ -24,7 +24,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#hackathonDetailsModal">
+                                <button class="dropdown-item" onclick="document.querySelector('.hackathon-image-container').scrollIntoView({behavior: 'smooth'})">
                                     <i class="bi bi-info-circle me-2"></i>Hackathon Details
                                 </button>
                             </li>
@@ -75,6 +75,111 @@
                 </div>
             </div>
         </div>
+        <!-- Hackathon Details Card -->
+<div class="row justify-content-center w-100 flex-grow-1 align-items-start m-0 py-4">
+    <div class="col-12 col-lg-10">
+        <div class="card neuromorphic">
+            <div class="card-body">
+                <h5 class="card-title mb-4">FALCONS.AI Hackathon Details</h5>
+
+                <!-- Add responsive image container -->
+                <div class="hackathon-image-container mb-4">
+                    <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
+                         class="img-fluid rounded w-100" 
+                         alt="Hackathon Banner"
+                         style="max-height: 300px; object-fit: contain;">
+                </div>
+
+                <h6 class="mb-3">About the Event</h6>
+                <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Codestrike brings together creative minds to build groundbreaking solutions. This is your chance to showcase your skills, collaborate with talented developers, and create impactful projects that could shape the future.') }}</p>
+
+                <h6 class="mb-3 mt-4">Timeline</h6>
+                <div class="card neuromorphic mb-4">
+                    <div class="card-body">
+                        <div class="deadline-info">
+                            <h5 class="text-center mb-4">Project Submission Deadline</h5>
+                            <p class="text-center deadline-display h4 mb-3"></p>
+                            <p class="text-center text-muted small">
+                                All project submissions must be completed before this deadline
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Winners Announcement</span>
+                        <span>Within 7 days after deadline</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Prize Distribution</span>
+                        <span>Within 30 days of winning</span>
+                    </li>
+                </ul>
+
+                <h6 class="mb-3">Prizes</h6>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card neuromorphic h-100">
+                            <div class="card-body text-center">
+                                <h5>🥇 First Place</h5>
+                                <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
+                                <small class="text-muted">Payout within 30 days of winning</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card neuromorphic h-100">
+                            <div class="card-body text-center">
+                                <h5>🥈 Second Place</h5>
+                                <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
+                                <small class="text-muted">Payout within 30 days of winning</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card neuromorphic h-100">
+                            <div class="card-body text-center">
+                                <h5>🥉 Third Place</h5>
+                                <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
+                                <small class="text-muted">Payout within 30 days of winning</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card neuromorphic mb-4">
+                    <div class="card-body">
+                        <h6 class="mb-3">Prize Information</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">💰 All prizes are paid in USD</li>
+                            <li class="mb-2">📅 Winners announced within 7 days of hackathon end</li>
+                            <li class="mb-2">🏦 Payments processed via secure bank transfer</li>
+                            <li class="mb-2">📝 Winners must complete W-8/W-9 tax forms</li>
+                            <li>✉️ Payment details will be collected via email</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h6 class="mb-3">Rules & Requirements</h6>
+                <ul class="list-group list-group-flush mb-4">
+                    {% for rule in hackathon_details.get('rules', [
+                        'Teams must consist of 1-4 members',
+                        'All code must be original and created during the hackathon',
+                        'Use of open source libraries and APIs is allowed',
+                        'Projects must be submitted before the deadline',
+                        'Each team must submit a working demo and documentation'
+                    ]) %}
+                    <li class="list-group-item">{{ rule }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h6 class="mb-3">Contact</h6>
+                <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
+            </div>
+        </div>
+    </div>
+</div>
     </main>
 
     <!-- Submit Project Modal -->
@@ -443,118 +548,6 @@
                     </div>
                     <div class="text-center mt-3">
                         <button type="button" class="btn" onclick="adminLogout()">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Hackathon Details Modal -->
-    <div class="modal fade" id="hackathonDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 1000px; width: 95%;">
-            <div class="modal-content neuromorphic">
-                <div class="modal-header">
-                    <h5 class="modal-title">FALCONS.AI Hackathon Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <!-- Add responsive image container -->
-                            <div class="hackathon-image-container mb-4">
-                                <img src="{{ url_for('static', filename='images/' + hackathon_details.get('image', '1-Red_Falcon_FAI_scaled.png')) }}" 
-                                     class="img-fluid rounded w-100" 
-                                     alt="Hackathon Banner"
-                                     style="max-height: 300px; object-fit: contain;">
-                            </div>
-
-                            <h6 class="mb-3">About the Event</h6>
-                            <p>{{ hackathon_details.get('description', 'Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Codestrike brings together creative minds to build groundbreaking solutions. This is your chance to showcase your skills, collaborate with talented developers, and create impactful projects that could shape the future.') }}</p>
-
-                            <h6 class="mb-3 mt-4">Timeline</h6>
-                            <div class="card neuromorphic mb-4">
-                                <div class="card-body">
-                                    <div class="deadline-info">
-                                        <h5 class="text-center mb-4">Project Submission Deadline</h5>
-                                        <p class="text-center deadline-display h4 mb-3"></p>
-                                        <p class="text-center text-muted small">
-                                            All project submissions must be completed before this deadline
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <ul class="list-group list-group-flush mb-4">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Winners Announcement</span>
-                                    <span>Within 7 days after deadline</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Prize Distribution</span>
-                                    <span>Within 30 days of winning</span>
-                                </li>
-                            </ul>
-
-                            <h6 class="mb-3">Prizes</h6>
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="card neuromorphic h-100">
-                                        <div class="card-body text-center">
-                                            <h5>🥇 First Place</h5>
-                                            <p>{{ hackathon_details.get('prizes', {}).get('first', '$5,000') }}</p>
-                                            <small class="text-muted">Payout within 30 days of winning</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card neuromorphic h-100">
-                                        <div class="card-body text-center">
-                                            <h5>🥈 Second Place</h5>
-                                            <p>{{ hackathon_details.get('prizes', {}).get('second', '$3,000') }}</p>
-                                            <small class="text-muted">Payout within 30 days of winning</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card neuromorphic h-100">
-                                        <div class="card-body text-center">
-                                            <h5>🥉 Third Place</h5>
-                                            <p>{{ hackathon_details.get('prizes', {}).get('third', '$2,000') }}</p>
-                                            <small class="text-muted">Payout within 30 days of winning</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card neuromorphic mb-4">
-                                <div class="card-body">
-                                    <h6 class="mb-3">Prize Information</h6>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="mb-2">💰 All prizes are paid in USD</li>
-                                        <li class="mb-2">📅 Winners announced within 7 days of hackathon end</li>
-                                        <li class="mb-2">🏦 Payments processed via secure bank transfer</li>
-                                        <li class="mb-2">📝 Winners must complete W-8/W-9 tax forms</li>
-                                        <li>✉️ Payment details will be collected via email</li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h6 class="mb-3">Rules & Requirements</h6>
-                            <ul class="list-group list-group-flush mb-4">
-                                {% for rule in hackathon_details.get('rules', [
-                                    'Teams must consist of 1-4 members',
-                                    'All code must be original and created during the hackathon',
-                                    'Use of open source libraries and APIs is allowed',
-                                    'Projects must be submitted before the deadline',
-                                    'Each team must submit a working demo and documentation'
-                                ]) %}
-                                <li class="list-group-item">{{ rule }}</li>
-                                {% endfor %}
-                            </ul>
-
-                            <h6 class="mb-3">Contact</h6>
-                            <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
-                        </div>
                     </div>
                 </div>
             </div>
