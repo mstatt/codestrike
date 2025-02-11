@@ -116,12 +116,13 @@ body {
 }
 
 .modal {
-    z-index: 9999 !important; /* Highest z-index to ensure modals are always on top */
+    z-index: 1055 !important;
     background: transparent;
 }
 
 .modal-backdrop {
-    display: none; /* Hide the backdrop completely */
+    z-index: 1050 !important;
+    opacity: 0.5 !important;
 }
 
 .modal-content {
@@ -129,6 +130,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     position: relative;
+    z-index: 1056 !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 

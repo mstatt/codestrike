@@ -176,7 +176,13 @@ function loadSubmissions() {
 
 function handleAdminLogin(event) {
     event.preventDefault();
-    const formData = new FormData(event.target);
+    const formData = new FormData();
+
+    const adminEmail = document.getElementById('adminEmail');
+    const adminPassword = document.getElementById('adminPassword');
+
+    formData.append('email', adminEmail.value);
+    formData.append('password', adminPassword.value);
 
     fetch('/admin/login', {
         method: 'POST',
@@ -185,17 +191,25 @@ function handleAdminLogin(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const loginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
-            loginModal.hide();
-            showAlert('Successfully logged in', 'success');
+            // Hide login modal
+            const adminLoginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
+            adminLoginModal.hide();
+
+            // Show success message
+            showAlert('Successfully logged in as admin', 'success');
+
+            // Reset the form
             event.target.reset();
+
+            // Redirect or show admin interface here
+            window.location.href = '/admin-dashboard';
         } else {
             showAlert(data.message || 'Invalid credentials', 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('An error occurred during login');
+        showAlert('An error occurred during login', 'danger');
     });
 }
 
