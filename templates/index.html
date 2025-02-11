@@ -23,14 +23,21 @@
                             <i class="bi bi-list"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
-                            <li>
+                              <li>
                                 <button class="dropdown-item" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
                                     <i class="bi bi-collection me-2"></i>All Submissions
                                 </button>
                             </li>
                             <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#termsModal">
-                                    <i class="bi bi-file-text me-2"></i>Terms and Conditions
+                                <button class="dropdown-item" data-bs-toggle="modal" 
+                                        data-bs-target="#submitProjectModal"
+>
+                                    <i class="bi bi-upload me-2"></i>Submit Project
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#winnersModal">
+                                    <i class="bi bi-trophy me-2"></i>Winners
                                 </button>
                             </li>
                             <li>
@@ -39,23 +46,10 @@
                                 </button>
                             </li>
                             <li>
-                                <button class="dropdown-item {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}disabled{% endif %}" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#submitProjectModal"
-                                        {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
-                                        title="Submission deadline has passed"
-                                        disabled
-                                        {% endif %}>
-                                    <i class="bi bi-upload me-2"></i>Submit Project
+                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                    <i class="bi bi-file-text me-2"></i>Terms and Conditions
                                 </button>
                             </li>
-                            {% if hackathon_details.get('deadline') and hackathon_details.get('deadline')|parse_datetime < now %}
-                            <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#winnersModal">
-                                    <i class="bi bi-trophy me-2"></i>Winners
-                                </button>
-                            </li>
-                            {% endif %}
                             <li>
                                 <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#adminModal">
                                     <i class="bi bi-shield-lock me-2"></i>Admin
@@ -183,7 +177,7 @@
                         </ul>
 
                         <h6 class="mb-3">Contact</h6>
-                        <p>For any questions or support, please contact us at: <a href="mailto:support@falcons.ai">support@falcons.ai</a></p>
+                        <p>For any questions or support, please contact us at: <a href="mailto:info@falcons.ai">support@falcons.ai</a></p>
                     </div>
                 </div>
             </div>
@@ -313,6 +307,7 @@
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            By clicking this box the participant agrees to the terms visible in the main menu and acknowledges that they read, understand and agree to them.
                         </div>
                     </div>
                 </div>
@@ -334,26 +329,41 @@
         </div>
     </footer>
 
-    <!-- Judging Criteria Modal -->
-    <div class="modal fade" id="criteriaModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content neuromorphic">
-                <div class="modal-header">
-                    <h5 class="modal-title">Judging Criteria</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Innovation and Creativity (30%)</li>
-                        <li class="list-group-item">Technical Complexity (25%)</li>
-                        <li class="list-group-item">Completeness and Polish (20%)</li>
-                        <li class="list-group-item">Practical Application (15%)</li>
-                        <li class="list-group-item">Presentation Quality (10%)</li>
-                    </ul>
-                </div>
+<!-- Judging Criteria Modal -->
+<div class="modal fade" id="criteriaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content neuromorphic">
+            <div class="modal-header">
+                <h5 class="modal-title">Judging Criteria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Innovation and Creativity (30%)</strong><br>
+                        Evaluates originality in problem-solving, uniqueness of the idea, and creativity in execution. Rewards unconventional solutions or fresh takes on existing problems.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Technical Implementation and Complexity (25%)</strong><br>
+                        Assesses the technical depth, architecture, and difficulty of implementation. Considers efficiency, scalability, and robustness of the solution.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Completeness and Polish (20%)</strong><br>
+                        Measures how fully functional and well-integrated the project is. Looks at UI/UX, performance, and attention to detail.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Practical Application and Impact (15%)</strong><br>
+                        Judges the project's real-world relevance, usability, and potential adoption. Considers whether it solves a meaningful problem effectively.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Presentation and Communication (10%)</strong><br>
+                        Evaluates clarity, structure, and persuasiveness of the presentation. Includes live demos, storytelling, and ability to answer questions effectively.
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Submissions Modal -->
     <div class="modal fade" id="submissionsModal" tabindex="-1">
@@ -367,6 +377,47 @@
                     <div class="list-group" id="submissionsList">
                         <!-- Submissions will be loaded here -->
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Terms and Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content neuromorphic">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+
+
+    <h2>Terms of Service</h2>
+    <p>By submitting your entry to this competition ("Hackathon"), you ("Participant") acknowledge and agree to the following terms in full. Submission of any entry constitutes binding acceptance of these terms.</p>
+    
+    <h3>1. Ownership and Rights</h3>
+    <p>By submitting any content, assets, source code, dependencies, or other materials ("Submission") as part of this Hackathon, Participant hereby irrevocably assigns, transfers, and conveys all rights, title, and interest in and to the Submission, including but not limited to intellectual property rights, copyrights, trademarks, patents, trade secrets, and any other proprietary rights, to the Hackathon Organizer ("Organizer"). Organizer shall have exclusive, perpetual, and unrestricted rights to use, modify, distribute, sublicense, sell, or otherwise exploit the Submission in any manner without further obligation, compensation, or notification to the Participant.</p>
+    
+    <h3>2. Liability Waiver</h3>
+    <p>Participant acknowledges and agrees that Organizer shall bear no legal, financial, or other liability for any claims, losses, damages, or disputes arising from Participant’s participation in the Hackathon. Participant expressly waives any right to pursue claims against Organizer, its affiliates, sponsors, partners, or representatives for any damages, including but not limited to direct, indirect, incidental, consequential, or special damages, whether foreseeable or unforeseeable.</p>
+    
+    <h3>3. Representation and Warranties</h3>
+    <p>Participant represents and warrants that they have full ownership of all assets, materials, and intellectual property included in the Submission. Participant further affirms that the Submission does not infringe upon or violate any third-party rights, including intellectual property rights, confidentiality agreements, or contractual obligations. In the event of any dispute, claim, or litigation concerning ownership or rights to any Submission, Participant assumes full legal and financial responsibility and agrees to indemnify, defend, and hold harmless Organizer from any claims, damages, liabilities, or expenses, including attorneys' fees.</p>
+    
+    <h3>4. Perpetual Agreement</h3>
+    <p>This Agreement is binding in perpetuity. At no point in the future shall Participant have any claim, right, title, or interest in or to the Submission or any derivative works created therefrom. Organizer retains the right to use, modify, distribute, commercialize, and otherwise exploit the Submission without restriction or compensation to Participant.</p>
+    
+    <h3>5. General Provisions</h3>
+    <ul>
+      <li>These terms shall be governed by and construed in accordance with the laws of United States of America.</li>
+      <li>Any disputes arising from these terms shall be exclusively resolved in the courts of United States of America.</li>
+      <li>If any provision of these terms is found to be invalid or unenforceable, the remaining provisions shall continue in full force and effect.</li>
+    </ul>
+    
+    <p>By participating in the Hackathon and submitting a Submission, Participant acknowledges that they have read, understood, and agreed to these Terms of Service in full.</p>
+
                 </div>
             </div>
         </div>
@@ -423,7 +474,7 @@
             <div class="modal-content neuromorphic">
                 <div class="modal-header">
                     <h5 class="modal-title">Admin Panel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" onclick="adminLogout()" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">

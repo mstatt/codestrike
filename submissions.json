@@ -1,18 +1,5 @@
 [
-  {
-    "email": "m.stattelman@falcons.ai",
-    "github_repo": "https://github.com/orgs/Falcons-ai/people/falconsai",
-    "demo_video": "https://www.youtube.com/watch?v=p4_-r0d9m5E",
-    "submitted_at": "2025-02-10T15:03:54.189085"
-  },
-  {
-    "email": "mike@supercess.com",
-    "github_repo": "https://github.com/orgs/Falcons-ai/p4eople/falconsai",
-    "demo_video": "https://www.youtube.com/watch?v=p4_-r0d9m5E",
-    "live_demo_url": "https://falcons.ai",
-    "demo_credentials": null,
-    "submitted_at": "2025-02-10T17:07:43.228003"
-  },
+
   {
     "email": "john.doe@example.com",
     "team_name": "Jackson 5",
@@ -22,5 +9,15 @@
     "live_demo_url": "https://falcons.ai",
     "demo_credentials": null,
     "submitted_at": "2025-02-11T01:38:38.688659"
+  },
+  {
+    "email": "jane.smith@example.com",
+    "team_name": "Jackson 5",
+    "project_name": "Wonder",
+    "github_repo": "https://github.com/orgs/Falcons-ai/people/falconsaioiyuufouyfou",
+    "demo_video": "https://www.youtube.com/watch?v=p4_-r0d9m5E",
+    "live_demo_url": "https://falcons.ai",
+    "demo_credentials": null,
+    "submitted_at": "2025-02-11T05:34:21.550549"
   }
 ]

@@ -1,7 +1,7 @@
 {
-  "deadline": "02/12/2025, 09:31:00 PM",
-  "title": "Decoding Data Science Challenge",
-  "description": "Join us for an exciting hackathon where innovation meets technology! The FALCONS.AI Hackathon brings together creative minds to build innovative solutions.",
+  "deadline": "02/10/2025, 07:31:00 PM",
+  "title": "EGYPTIAN AI Challenge",
+  "description": "The AI Innovators Hackathon is an exciting, fast-paced event where developers, data scientists, and tech enthusiasts collaborate to build cutting-edge AI-powered solutions. Over the course of the hackathon, participants will brainstorm, design, and prototype innovative applications leveraging machine learning, natural language processing, computer vision, and automation. Whether you're a beginner or an expert, this hackathon provides a unique opportunity to network, learn from mentors, and showcase your AI skills. Compete for prizes, gain hands-on experience, and push the boundaries of artificial intelligence in a dynamic, team-driven environment! ",
   "rules": [
     "Teams must consist of 1-4 members\r",
     "All code must be original and created during the hackathon\r",
@@ -10,9 +10,9 @@
     "Each team must submit a working demo, accessible github repository and a video demo."
   ],
   "prizes": {
-    "first": "$5,000",
-    "second": "$2,500",
-    "third": "$1,500"
+    "first": "$10,000",
+    "second": "$7,500",
+    "third": "$5,000"
   },
-  "image": "00a99a686e-2c2b-4073-8460-a4605a59a051.jpg"
+  "image": "banner.jpg"
 }

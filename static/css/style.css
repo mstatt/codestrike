@@ -34,6 +34,19 @@ body {
     transition: all 0.3s ease;
 }
 
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color, #000); /* Fallback */
+    opacity: 0.9; /* 50% opacity */
+    z-index: -1;
+}
+
+
 .header-shadow {
     background-color: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
@@ -97,7 +110,7 @@ body {
 }
 
 .neuromorphic {
-    background: rgba(22, 24, 28, 0.7);
+    background: rgba(22, 24, 28, 0.6);
     border-radius: 16px;
     border: 2px solid var(--primary-color);
     padding: 15px;
@@ -398,7 +411,7 @@ body {
 }
 
 .dropdown-menu.neuromorphic {
-    background: rgba(22, 24, 28, 0.7);
+    background: rgba(22, 24, 28, 0.9);
 }
 
 .dropdown-menu .dropdown-item {
