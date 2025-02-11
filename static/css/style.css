@@ -116,19 +116,20 @@ body {
 }
 
 .modal {
-    z-index: 1060;  /* Increased z-index to be higher than backdrop */
+    z-index: 9999 !important; /* Highest z-index to ensure modals are always on top */
+    background: transparent;
 }
 
 .modal-backdrop {
-    z-index: 1050;
+    display: none; /* Hide the backdrop completely */
 }
 
 .modal-content {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
-    position: relative;  /* Add relative positioning */
-    z-index: 1;  /* Ensure content is above any nested elements */
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header, .modal-footer {
