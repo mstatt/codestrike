@@ -72,7 +72,7 @@ body {
 }
 
 .header-menu-btn {
-    opacity: 0.85;
+    opacity: 0.75;
     transition: opacity 0.2s ease;
 }
 
@@ -82,8 +82,8 @@ body {
 
 .header-menu-btn .bi-list {
     font-size: 1.5rem;
+    color: white;
 }
-
 
 .main-content {
     padding: 2rem 0;
@@ -395,4 +395,27 @@ body {
 
 .modal.fade .modal-dialog {
     transition: transform 0.2s ease-out;
+}
+
+.dropdown-menu.neuromorphic {
+    background: rgba(22, 24, 28, 0.7);
+}
+
+.dropdown-menu .dropdown-item {
+    color: white;
+    opacity: 0.85;
+    transition: all 0.2s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+.dropdown-menu .dropdown-item i {
+    opacity: 0.85;
+}
+
+.dropdown-menu .dropdown-item:hover i {
+    opacity: 1;
 }
