@@ -63,23 +63,10 @@ function checkDeadlineForMenuItems() {
             }
 
             const now = new Date();
-            const submitButton = document.getElementById('submitProjectBtn');
             const winnersButton = document.querySelector('[data-bs-target="#winnersModal"]');
 
             if (winnersButton && winnersButton.parentElement) {
                 winnersButton.parentElement.style.display = now > deadline ? 'block' : 'none';
-            }
-
-            if (submitButton) {
-                if (now > deadline) {
-                    submitButton.disabled = true;
-                    submitButton.title = 'Submission deadline has passed';
-                    submitButton.classList.add('disabled');
-                } else {
-                    submitButton.disabled = false;
-                    submitButton.title = '';
-                    submitButton.classList.remove('disabled');
-                }
             }
         })
         .catch(error => {
@@ -91,11 +78,13 @@ function updateHackathonDeadlines() {
     fetch('/hackathon-details')
         .then(response => response.json())
         .then(data => {
+            // Update form fields
             if (data.deadline) {
-                const deadline = new Date(data.deadline.replace(/,/, '')); 
+                const deadline = new Date(data.deadline.replace(/,/, '')); // Remove comma from date string
                 const formattedDeadline = deadline.toISOString().slice(0, 16);
                 document.getElementById('newDeadline').value = formattedDeadline;
 
+                // Format deadline for display in modal
                 const displayDeadline = deadline.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -104,14 +93,17 @@ function updateHackathonDeadlines() {
                     minute: '2-digit'
                 });
 
+                // Update deadline in modal if the element exists
                 const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
                 if (deadlineDisplay) {
                     deadlineDisplay.textContent = `Submission Deadline: ${displayDeadline}`;
                 }
-            }
-
-            if (data.contact_email) {
-                document.getElementById('contactEmail').value = data.contact_email;
+            } else {
+                // Handle case where deadline is not set
+                const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
+                if (deadlineDisplay) {
+                    deadlineDisplay.textContent = 'Submission Deadline: Not yet announced';
+                }
             }
             if (data.title) {
                 document.getElementById('hackathonTitle').value = data.title;
@@ -127,10 +119,11 @@ function updateHackathonDeadlines() {
                 document.getElementById('secondPrize').value = data.prizes.second || '';
                 document.getElementById('thirdPrize').value = data.prizes.third || '';
             }
+            // Update modal image if exists
             if (data.image) {
                 const modalImage = document.querySelector('#hackathonDetailsModal .hackathon-image-container img');
                 if (modalImage) {
-                    const timestamp = new Date().getTime(); 
+                    const timestamp = new Date().getTime(); // Add timestamp to prevent caching
                     modalImage.src = `/static/images/${data.image}?t=${timestamp}`;
                 }
             }
@@ -138,6 +131,12 @@ function updateHackathonDeadlines() {
         .catch(error => {
             console.error('Error loading hackathon details:', error);
             showAlert('Error loading hackathon details');
+
+            // Set default message for deadline in case of error
+            const deadlineDisplay = document.querySelector('#hackathonDetailsModal .deadline-display');
+            if (deadlineDisplay) {
+                deadlineDisplay.textContent = 'Submission Deadline: Unable to load';
+            }
         });
 }
 
@@ -158,6 +157,7 @@ function initializeCountdown() {
 
             const deadlineTime = deadline.getTime();
 
+            // Format the deadline date for display
             const formattedDeadline = deadline.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -178,6 +178,7 @@ function initializeCountdown() {
                         submissionForm.classList.add('d-none');
                     }
 
+                    // Show hackathon ended message
                     const endedMessage = document.getElementById('hackathonEndedMessage');
                     if (endedMessage) {
                         endedMessage.classList.remove('d-none');
@@ -262,13 +263,16 @@ function showAlert(message, type = 'danger') {
     `;
     alertContainer.appendChild(alert);
 
+    // Remove alert after 5 seconds
     setTimeout(() => {
         alert.classList.remove('show');
         setTimeout(() => alert.remove(), 150);
     }, 5000);
 }
 
+
 function previewSubmission() {
+    // Get all form values
     const email = document.getElementById('email').value;
     const teamName = document.getElementById('team_name').value;
     const projectName = document.getElementById('project_name').value;
@@ -278,11 +282,13 @@ function previewSubmission() {
     const username = document.getElementById('demo_username').value;
     const password = document.getElementById('demo_password').value;
 
+    // Validate required fields
     if (!email || !teamName || !projectName || !github || !video || !liveDemo) {
         showAlert('Please fill in all required fields before previewing', 'warning');
         return;
     }
 
+    // Update preview modal content
     document.getElementById('previewEmail').textContent = email;
     document.getElementById('previewTeamName').textContent = teamName;
     document.getElementById('previewProjectName').textContent = projectName;
@@ -299,6 +305,7 @@ function previewSubmission() {
     liveDemoLink.href = liveDemo;
     liveDemoLink.textContent = liveDemo;
 
+    // Handle optional credentials
     const credentialsSection = document.getElementById('previewCredentials');
     if (username && password) {
         document.getElementById('previewUsername').textContent = username;
@@ -308,11 +315,13 @@ function previewSubmission() {
         credentialsSection.classList.add('d-none');
     }
 
+    // Show preview modal
     const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
     previewModal.show();
 }
 
 function submitFinalProject() {
+    // Get form values
     const formData = new FormData();
     formData.append('email', document.getElementById('email').value);
     formData.append('team_name', document.getElementById('team_name').value);
@@ -328,6 +337,7 @@ function submitFinalProject() {
         formData.append('demo_password', password);
     }
 
+    // Submit the form
     fetch('/submit', {
         method: 'POST',
         body: formData
@@ -335,11 +345,13 @@ function submitFinalProject() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close preview modal
                 const previewModal = bootstrap.Modal.getInstance(document.getElementById('previewSubmissionModal'));
                 previewModal.hide();
 
                 showAlert(data.message, 'success');
                 document.getElementById('projectSubmissionForm').reset();
+                // Reset validation icons
                 document.querySelectorAll('.validation-icon').forEach(icon => {
                     icon.innerHTML = '';
                     icon.classList.remove('valid', 'invalid');
@@ -409,16 +421,19 @@ function handleAdminLogin(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close login modal and open admin panel
                 const loginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
                 loginModal.hide();
 
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
+                // Load registered emails, teams, and winners
                 loadRegisteredEmails();
                 loadTeams();
                 loadAdminWinners();
 
+                // Reset form
                 document.getElementById('adminLoginForm').reset();
             } else {
                 showAlert(data.message || 'Invalid credentials', 'danger');
@@ -431,6 +446,7 @@ function handleAdminLogin(event) {
 }
 
 function loadRegisteredEmails() {
+    // First get the teams to populate dropdowns
     fetch('/admin/teams')
         .then(response => response.json())
         .then(teamsData => {
@@ -438,11 +454,13 @@ function loadRegisteredEmails() {
                 throw new Error('Failed to load teams');
             }
 
+            // Now load emails
             return fetch('/admin/emails').then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('emailsTableBody');
                     tableBody.innerHTML = '';
 
+                    // Create team options HTML
                     const teamOptionsHtml = teamsData.teams.map(team =>
                         `<option value="${team}">${team}</option>`
                     ).join('');
@@ -474,6 +492,7 @@ function loadRegisteredEmails() {
                         `;
                         tableBody.appendChild(row);
 
+                        // Set selected team if exists
                         if (assignedTeam) {
                             const select = row.querySelector('.team-select');
                             select.value = assignedTeam;
@@ -525,6 +544,7 @@ function editEmail(button) {
     const emailInput = row.querySelector('input[type="email"]');
 
     if (emailText.classList.contains('d-none')) {
+        // Save changes
         const newEmail = emailInput.value.trim();
         const oldEmail = emailText.textContent;
 
@@ -555,6 +575,7 @@ function editEmail(button) {
         emailInput.classList.add('d-none');
         button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
     } else {
+        // Show edit input
         emailText.classList.add('d-none');
         emailInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -602,13 +623,13 @@ function updateEmailTeam(email, team) {
                 showAlert('Team assignment updated successfully', 'success');
             } else {
                 showAlert(data.message || 'Failed to update team assignment', 'danger');
-                loadRegisteredEmails(); 
+                loadRegisteredEmails(); // Reload to reset state
             }
         })
         .catch(error => {
             console.error('Error:', error);
             showAlert('An error occurred while updating team assignment');
-            loadRegisteredEmails(); 
+            loadRegisteredEmails(); // Reload to reset state
         });
 }
 
@@ -624,7 +645,6 @@ function handleAdminUpdate(event) {
     const secondPrize = document.getElementById('secondPrize').value;
     const thirdPrize = document.getElementById('thirdPrize').value;
     const hackathonLogo = document.getElementById('hackathonLogo').files[0];
-    const contactEmail = document.getElementById('contactEmail').value;
 
     if (hackathonLogo) {
         formData.append('logo', hackathonLogo);
@@ -658,10 +678,6 @@ function handleAdminUpdate(event) {
         formData.append('third_prize', thirdPrize);
     }
 
-    if (contactEmail) {
-        formData.append('contact_email', contactEmail);
-    }
-
     fetch('/admin/update', {
         method: 'POST',
         body: formData
@@ -670,26 +686,23 @@ function handleAdminUpdate(event) {
         .then(data => {
             if (data.success) {
                 showAlert('Hackathon details updated successfully', 'success');
-                initializeCountdown(); 
-                updateHackathonDeadlines(); 
-                checkDeadlineForMenuItems(); 
+                initializeCountdown(); // Refresh countdown
+                updateHackathonDeadlines(); // Refresh deadlines
+                checkDeadlineForMenuItems(); // Update menu items visibility
 
-                const contactSection = document.querySelector('.card.neuromorphic a[href^="mailto:"]');
-                if (contactSection && data.details && data.details.contact_email) {
-                    contactSection.href = `mailto:${data.details.contact_email}`;
-                    contactSection.textContent = data.details.contact_email;
-                }
-
+                // Update modal content
                 const detailsModal = document.getElementById('hackathonDetailsModal');
                 if (detailsModal && data.details) {
+                    // Update image if provided
                     if (data.details.image) {
                         const modalImage = detailsModal.querySelector('.hackathon-image-container img');
                         if (modalImage) {
-                            const timestamp = new Date().getTime(); 
+                            const timestamp = new Date().getTime(); // Add timestamp to prevent caching
                             modalImage.src = `/static/images/${data.details.image}?t=${timestamp}`;
                         }
                     }
 
+                    // Update other modal content
                     if (data.details.title) {
                         detailsModal.querySelector('.modal-title').textContent = data.details.title;
                     }
@@ -728,11 +741,13 @@ function adminLogout() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close admin panel modal
                 const adminPanelModal = bootstrap.Modal.getInstance(document.getElementById('adminPanelModal'));
                 if (adminPanelModal) {
                     adminPanelModal.hide();
                 }
 
+                // Re-enable page elements
                 document.body.classList.remove('modal-open');
                 const modalBackdrop = document.querySelector('.modal-backdrop');
                 if (modalBackdrop) {
@@ -832,6 +847,7 @@ function editWinner(button) {
     const inputs = row.querySelectorAll('input');
 
     if (texts[0].classList.contains('d-none')) {
+        // Save changes
         const teamName = inputs[0].value;
         const projectName = inputs[1].value;
         const points = inputs[2].value;
@@ -868,6 +884,7 @@ function editWinner(button) {
                 showAlert('An error occurred while updating winner');
             });
     } else {
+        // Show edit inputs
         texts.forEach(text => text.classList.add('d-none'));
         inputs.forEach(input => input.classList.remove('d-none'));
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -912,6 +929,7 @@ function loadWinners() {
                 const item = document.createElement('div');
                 item.className = 'list-group-item neuromorphic mb-2';
 
+                // Add trophy emoji for top 3
                 let trophyIcon = '';
                 if (index === 0) trophyIcon = '🏆 ';
                 else if (index === 1) trophyIcon = '🥈 ';
@@ -924,7 +942,7 @@ function loadWinners() {
                             <p class="mb-1">${winner.project_name}</p>
                             <p class="mb-1">Points: ${winner.points}</p>
                         </div>
-                        <span class="badge bg-primary rounded-pill">#${index + 1}</span>
+                        <<span class="badge bg-primary rounded-pill">#${index + 1}</span>
                     </div>
                 `;
                 winnersList.appendChild(item);
@@ -939,7 +957,7 @@ function loadWinners() {
 function loadTeams() {
     fetch('/admin/teams')
         .then(response => response.json())
-        .then(data=> {
+        .then(data => {
             if (data.success) {
                 const tableBody = document.getElementById('teamsTableBody');
                 tableBody.innerHTML = '';
@@ -1005,6 +1023,7 @@ function editTeam(button) {
     const teamInput = row.querySelector('input[type="text"]');
 
     if (teamText.classList.contains('d-none')) {
+        // Save changes
         const newTeamName = teamInput.value.trim();
         const oldTeamName = teamText.textContent;
 
@@ -1038,6 +1057,7 @@ function editTeam(button) {
         teamInput.classList.add('d-none');
         button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
     } else {
+        // Show edit input
         teamText.classList.add('d-none');
         teamInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -1045,10 +1065,16 @@ function editTeam(button) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Update hackathon details deadlines
     updateHackathonDeadlines();
+
+    // Initialize countdown timer with current date
     initializeCountdown();
+
+    // Check deadline for menu items visibility
     checkDeadlineForMenuItems();
 
+    // Form validation
     const submissionForm = document.getElementById('projectSubmissionForm');
     if (submissionForm) {
         const inputs = submissionForm.querySelectorAll('input[required]');
@@ -1059,15 +1085,18 @@ document.addEventListener('DOMContentLoaded', function() {
         submissionForm.addEventListener('submit', handleSubmission);
     }
 
+    // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggleIcon();
 
+    // Load submissions if the element exists
     const submissionsList = document.getElementById('submissionsList');
     if (submissionsList) {
         loadSubmissions();
     }
 
+    // Add admin-related event listeners
     const adminLoginForm = document.getElementById('adminLoginForm');
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', handleAdminLogin);
@@ -1078,21 +1107,26 @@ document.addEventListener('DOMContentLoaded', function() {
         adminUpdateForm.addEventListener('submit', handleAdminUpdate);
     }
 
+    // Add event listener for winners modal
     const winnersModal = document.getElementById('winnersModal');
     if (winnersModal) {
         winnersModal.addEventListener('show.bs.modal', loadWinners);
     }
 
+    // Add event listener for admin panel modal
     const adminPanelModal = document.getElementById('adminPanelModal');
     if (adminPanelModal) {
         adminPanelModal.addEventListener('show.bs.modal', function () {
+            // Load current hackathon details into form fields
             updateHackathonDeadlines();
+            // Load other admin data
             loadRegisteredEmails();
             loadTeams();
             loadAdminWinners();
         });
 
         adminPanelModal.addEventListener('hidden.bs.modal', function () {
+            // Re-enable page elements
             document.body.classList.remove('modal-open');
             const modalBackdrop = document.querySelector('.modal-backdrop');
             if (modalBackdrop) {
@@ -1101,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Add event listener for winners tab
     const winnersTab = document.getElementById('winners-tab');
     if (winnersTab) {
         winnersTab.addEventListener('shown.bs.tab', loadAdminWinners);
@@ -1164,6 +1199,7 @@ function showAlert(message, type = 'danger') {
     `;
     alertContainer.appendChild(alert);
 
+    // Remove alert after 5 seconds
     setTimeout(() => {
         alert.classList.remove('show');
         setTimeout(() => alert.remove(), 150);
@@ -1224,16 +1260,19 @@ function handleAdminLogin(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close login modal and open admin panel
                 const loginModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
                 loginModal.hide();
 
                 const adminPanelModal = new bootstrap.Modal(document.getElementById('adminPanelModal'));
                 adminPanelModal.show();
 
+                // Load registered emails, teams, and winners
                 loadRegisteredEmails();
                 loadTeams();
                 loadAdminWinners();
 
+                // Reset form
                 document.getElementById('adminLoginForm').reset();
             } else {
                 showAlert(data.message || 'Invalid credentials', 'danger');
@@ -1246,6 +1285,7 @@ function handleAdminLogin(event) {
 }
 
 function loadRegisteredEmails() {
+    // First get the teams to populate dropdowns
     fetch('/admin/teams')
         .then(response => response.json())
         .then(teamsData => {
@@ -1253,11 +1293,13 @@ function loadRegisteredEmails() {
                 throw new Error('Failed to load teams');
             }
 
+            // Now load emails
             return fetch('/admin/emails').then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('emailsTableBody');
                     tableBody.innerHTML = '';
 
+                    // Create team options HTML
                     const teamOptionsHtml = teamsData.teams.map(team =>
                         `<option value="${team}">${team}</option>`
                     ).join('');
@@ -1289,6 +1331,7 @@ function loadRegisteredEmails() {
                         `;
                         tableBody.appendChild(row);
 
+                        // Set selected team if exists
                         if (assignedTeam) {
                             const select = row.querySelector('.team-select');
                             select.value = assignedTeam;
@@ -1340,6 +1383,7 @@ function editEmail(button) {
     const emailInput = row.querySelector('input[type="email"]');
 
     if (emailText.classList.contains('d-none')) {
+        // Save changes
         const newEmail = emailInput.value.trim();
         const oldEmail = emailText.textContent;
 
@@ -1370,6 +1414,7 @@ function editEmail(button) {
         emailInput.classList.add('d-none');
         button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
     } else {
+        // Show edit input
         emailText.classList.add('d-none');
         emailInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -1417,13 +1462,13 @@ function updateEmailTeam(email, team) {
                 showAlert('Team assignment updated successfully', 'success');
             } else {
                 showAlert(data.message || 'Failed to update team assignment', 'danger');
-                loadRegisteredEmails();
+                loadRegisteredEmails(); // Reload to reset state
             }
         })
         .catch(error => {
             console.error('Error:', error);
             showAlert('An error occurred while updating team assignment');
-            loadRegisteredEmails();
+            loadRegisteredEmails(); // Reload to reset state
         });
 }
 
@@ -1439,7 +1484,6 @@ function handleAdminUpdate(event) {
     const secondPrize = document.getElementById('secondPrize').value;
     const thirdPrize = document.getElementById('thirdPrize').value;
     const hackathonLogo = document.getElementById('hackathonLogo').files[0];
-    const contactEmail = document.getElementById('contactEmail').value;
 
     if (hackathonLogo) {
         formData.append('logo', hackathonLogo);
@@ -1473,10 +1517,6 @@ function handleAdminUpdate(event) {
         formData.append('third_prize', thirdPrize);
     }
 
-    if (contactEmail) {
-        formData.append('contact_email', contactEmail);
-    }
-
     fetch('/admin/update', {
         method: 'POST',
         body: formData
@@ -1485,26 +1525,23 @@ function handleAdminUpdate(event) {
         .then(data => {
             if (data.success) {
                 showAlert('Hackathon details updated successfully', 'success');
-                initializeCountdown();
-                updateHackathonDeadlines();
-                checkDeadlineForMenuItems();
+                initializeCountdown(); // Refresh countdown
+                updateHackathonDeadlines(); // Refresh deadlines
+                checkDeadlineForMenuItems(); // Update menu items visibility
 
-                const contactSection = document.querySelector('.card.neuromorphic a[href^="mailto:"]');
-                if (contactSection && data.details && data.details.contact_email) {
-                    contactSection.href = `mailto:${data.details.contact_email}`;
-                    contactSection.textContent = data.details.contact_email;
-                }
-
+                // Update modal content
                 const detailsModal = document.getElementById('hackathonDetailsModal');
                 if (detailsModal && data.details) {
+                    // Update image if provided
                     if (data.details.image) {
                         const modalImage = detailsModal.querySelector('.hackathon-image-container img');
                         if (modalImage) {
-                            const timestamp = new Date().getTime();
+                            const timestamp = new Date().getTime(); // Add timestamp to prevent caching
                             modalImage.src = `/static/images/${data.details.image}?t=${timestamp}`;
                         }
                     }
 
+                    // Update other modal content
                     if (data.details.title) {
                         detailsModal.querySelector('.modal-title').textContent = data.details.title;
                     }
@@ -1543,11 +1580,13 @@ function adminLogout() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Close admin panel modal
                 const adminPanelModal = bootstrap.Modal.getInstance(document.getElementById('adminPanelModal'));
                 if (adminPanelModal) {
                     adminPanelModal.hide();
                 }
 
+                // Re-enable page elements
                 document.body.classList.remove('modal-open');
                 const modalBackdrop = document.querySelector('.modal-backdrop');
                 if (modalBackdrop) {
@@ -1647,6 +1686,7 @@ function editWinner(button) {
     const inputs = row.querySelectorAll('input');
 
     if (texts[0].classList.contains('d-none')) {
+        // Save changes
         const teamName = inputs[0].value;
         const projectName = inputs[1].value;
         const points = inputs[2].value;
@@ -1683,6 +1723,7 @@ function editWinner(button) {
                 showAlert('An error occurred while updating winner');
             });
     } else {
+        // Show edit inputs
         texts.forEach(text => text.classList.add('d-none'));
         inputs.forEach(input => input.classList.remove('d-none'));
         button.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -1727,6 +1768,7 @@ function loadWinners() {
                 const item = document.createElement('div');
                 item.className = 'list-group-item neuromorphic mb-2';
 
+                // Add trophy emoji for top 3
                 let trophyIcon = '';
                 if (index === 0) trophyIcon = '🏆 ';
                 else if (index === 1) trophyIcon = '🥈 ';
@@ -1820,6 +1862,7 @@ function editTeam(button) {
     const teamInput = row.querySelector('input[type="text"]');
 
     if (teamText.classList.contains('d-none')) {
+        // Save changes
         const newTeamName = teamInput.value.trim();
         const oldTeamName = teamText.textContent;
 
@@ -1853,6 +1896,7 @@ function editTeam(button) {
         teamInput.classList.add('d-none');
         button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
     } else {
+        // Show edit input
         teamText.classList.add('d-none');
         teamInput.classList.remove('d-none');
         button.innerHTML = '<i class="bi bi-check-lg"></i>';

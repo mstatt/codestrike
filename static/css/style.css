@@ -74,12 +74,10 @@ body {
 .header-menu-btn {
     opacity: 0.85;
     transition: opacity 0.2s ease;
-    color: white;
 }
 
 .header-menu-btn:hover {
     opacity: 1;
-    color: white;
 }
 
 .header-menu-btn .bi-list {
@@ -397,13 +395,4 @@ body {
 
 .modal.fade .modal-dialog {
     transition: transform 0.2s ease-out;
-}
-
-.dropdown-menu.neuromorphic .dropdown-item {
-    color: white;
-    transition: all 0.2s ease;
-}
-
-.dropdown-menu.neuromorphic .dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.1);
 }
