@@ -24,22 +24,12 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end neuromorphic" aria-labelledby="headerMenuButton">
                             <li>
-                                <button class="dropdown-item" onclick="document.querySelector('.hackathon-image-container').scrollIntoView({behavior: 'smooth'})">
-                                    <i class="bi bi-info-circle me-2"></i>Hackathon Details
-                                </button>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" onclick="toggleTheme()">
-                                    <i class="bi bi-moon-fill me-2"></i>Toggle Theme
-                                </button>
-                            </li>
-                            <li>
                                 <button class="dropdown-item" onclick="loadSubmissions()" data-bs-toggle="modal" data-bs-target="#submissionsModal">
                                     <i class="bi bi-collection me-2"></i>All Submissions
                                 </button>
                             </li>
                             <li>
-                                <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#submitProjectModal">
+                                <button class="dropdown-item" id="submitProjectBtn" data-bs-toggle="modal" data-bs-target="#submitProjectModal">
                                     <i class="bi bi-upload me-2"></i>Submit Project
                                 </button>
                             </li>
@@ -443,6 +433,10 @@
                                 <div class="mb-3">
                                     <label for="hackathonRules" class="form-label">Rules & Requirements</label>
                                     <textarea class="form-control neuromorphic-input" id="hackathonRules" rows="5" placeholder="Enter each rule on a new line"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contactEmail" class="form-label">Contact Email</label>
+                                    <input type="email" class="form-control neuromorphic-input" id="contactEmail" placeholder="support@falcons.ai">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Prizes</label>
