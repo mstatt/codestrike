@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', function(event) {
             event.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (!email || !password) {
+                showAlert('Please fill in all fields', 'danger');
+                return;
+            }
+
             handleAdminLogin(event);
         });
     }
@@ -212,6 +220,7 @@ function loadSubmissions() {
 
 function handleAdminLogin(event) {
     const formData = new FormData(event.target);
+    const adminModal = document.getElementById('adminModal');
 
     fetch('/admin/login', {
         method: 'POST',
@@ -220,17 +229,24 @@ function handleAdminLogin(event) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
-            if (modal) modal.hide();
-            showAlert('Successfully logged in', 'success');
-            event.target.reset();
+            const modal = bootstrap.Modal.getInstance(adminModal);
+            if (modal) {
+                modal.hide();
+                event.target.reset();
+                showAlert('Successfully logged in as admin', 'success');
+
+                // Refresh the page after successful login
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
         } else {
             showAlert(data.message || 'Invalid credentials', 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('An error occurred during login');
+        showAlert('An error occurred during login. Please try again.', 'danger');
     });
 }
 

@@ -197,18 +197,21 @@ def get_submissions():
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
     try:
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
 
         logging.debug(f"Admin login attempt with email: {email}")
 
+        if not email or not password:
+            return jsonify({'success': False, 'message': 'Email and password are required'}), 400
+
         if verify_admin_credentials(email, password):
             session['admin'] = True
-            return jsonify({'success': True})
+            return jsonify({'success': True, 'message': 'Login successful'})
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     except Exception as e:
         logging.error(f"Error in admin login: {str(e)}")
-        return jsonify({'success': False, 'message': 'An error occurred'}), 500
+        return jsonify({'success': False, 'message': 'An error occurred during login'}), 500
 
 @app.route('/admin/update', methods=['POST'])
 def admin_update():
