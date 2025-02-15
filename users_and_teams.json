@@ -2,8 +2,7 @@
   "teams": [
     "Falcons",
     "Xbox",
-    "Jackson 5",
-    "Hello World"
+    "Jackson 5"
   ],
   "users": [
     {
@@ -15,12 +14,8 @@
       "team": "Xbox"
     },
     {
-      "email": "mike@supercess.com",
+      "email": "mike@yahoo.com",
       "team": "Jackson 5"
-    },
-    {
-      "email": "mstatt47@gmail.com",
-      "team": "Falcons"
     }
   ]
 }

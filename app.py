@@ -669,5 +669,24 @@ def get_hackathon_details():
         logging.error(f"Error getting hackathon details: {str(e)}")
         return jsonify({'error': 'Could not load hackathon details'}), 500
 
+@app.route('/check_github', methods=['POST'])
+def check_github():
+    try:
+        github = request.form.get('github', '').strip()
+        
+        if not github:
+            return jsonify({'success': False, 'message': 'GitHub URL is required'}), 400
+
+        submissions = load_submissions()
+        
+        # Check if GitHub URL already exists in submissions
+        if any(s.get('github_repo') == github for s in submissions):
+            return jsonify({'success': False, 'message': 'GitHub repository already submitted'}), 400
+
+        return jsonify({'success': True, 'message': 'GitHub URL is unique'}), 200
+    except Exception as e:
+        logging.error(f"Error checking GitHub URL: {str(e)}")
+        return jsonify({'success': False, 'message': 'Error checking GitHub URL'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

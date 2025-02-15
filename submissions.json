@@ -1,15 +1,4 @@
 [
-
-  {
-    "email": "john.doe@example.com",
-    "team_name": "Jackson 5",
-    "project_name": "Wonder",
-    "github_repo": "https://github.com/orgs/Falcons-ai/people/falconsaiuygkjhk",
-    "demo_video": "https://www.youtube.com/watch?v=p4_-r0d9m5E",
-    "live_demo_url": "https://falcons.ai",
-    "demo_credentials": null,
-    "submitted_at": "2025-02-11T01:38:38.688659"
-  },
   {
     "email": "jane.smith@example.com",
     "team_name": "Jackson 5",
@@ -19,5 +8,25 @@
     "live_demo_url": "https://falcons.ai",
     "demo_credentials": null,
     "submitted_at": "2025-02-11T05:34:21.550549"
+  },
+  {
+    "email": "mike@google.com",
+    "team_name": "FALCONS",
+    "project_name": "Uplift",
+    "github_repo": "https://github.com/CodeDroid999/CropCareAI",
+    "demo_video": "https://www.youtube.com/watch?v=SAFWA7qxC0E&list=RDSAFWA7qxC0E&start_radio=1",
+    "live_demo_url": "http://google.com",
+    "demo_credentials": null,
+    "submitted_at": "2025-02-15T03:37:29.966962"
+  },
+  {
+    "email": "john.doe@example.com",
+    "team_name": "DEFAULT",
+    "project_name": "Nevuary",
+    "github_repo": "https://github.com/orgs/Falcons-ai/peoople/falconsaioiyuufouyfou",
+    "demo_video": "https://www.youtube.com/watch?v=SAFWA7qxC0E&list=RDSAFWA7qxC0E&start_radio=1",
+    "live_demo_url": "http://google.com",
+    "demo_credentials": null,
+    "submitted_at": "2025-02-15T04:18:33.454326"
   }
 ]

@@ -205,14 +205,39 @@ function showAlert(message, type = 'danger') {
 
 function previewSubmission() {
     // Get all form values
-    const email = document.getElementById('email').value;
+    const emailInput = document.getElementById('email');
+    const email = emailInput.value;
     const teamName = document.getElementById('team_name').value;
     const projectName = document.getElementById('project_name').value;
-    const github = document.getElementById('github').value;
+    const githubInput = document.getElementById('github');
+    const github = githubInput.value;
     const video = document.getElementById('video').value;
     const liveDemo = document.getElementById('live_demo_url').value;
     const username = document.getElementById('demo_username').value;
     const password = document.getElementById('demo_password').value;
+
+    // Get or create error message elements
+    let emailErrorEl = document.getElementById('email-error');
+    if (!emailErrorEl) {
+        emailErrorEl = document.createElement('div');
+        emailErrorEl.id = 'email-error';
+        emailErrorEl.classList.add('text-danger', 'small', 'mt-1');
+        emailInput.parentNode.insertBefore(emailErrorEl, emailInput.nextSibling);
+    }
+
+    let githubErrorEl = document.getElementById('github-error');
+    if (!githubErrorEl) {
+        githubErrorEl = document.createElement('div');
+        githubErrorEl.id = 'github-error';
+        githubErrorEl.classList.add('text-danger', 'small', 'mt-1');
+        githubInput.parentNode.insertBefore(githubErrorEl, githubInput.nextSibling);
+    }
+
+    // Reset previous validation styles and error messages
+    emailInput.classList.remove('is-invalid');
+    githubInput.classList.remove('is-invalid');
+    emailErrorEl.textContent = '';
+    githubErrorEl.textContent = '';
 
     // Validate required fields
     if (!email || !teamName || !projectName || !github || !video || !liveDemo) {
@@ -220,48 +245,95 @@ function previewSubmission() {
         return;
     }
 
-    // Update preview modal content
-    document.getElementById('previewEmail').textContent = email;
-    document.getElementById('previewTeamName').textContent = teamName;
-    document.getElementById('previewProjectName').textContent = projectName;
+    // Validate email and GitHub URL
+    Promise.all([
+        fetch('/verify_email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}`
+        }),
+        fetch('/check_github', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `github=${encodeURIComponent(github)}`
+        })
+    ])
+    .then(([emailResponse, githubResponse]) => 
+        Promise.all([emailResponse.json(), githubResponse.json()])
+    )
+    .then(([emailData, githubData]) => {
+        let hasError = false;
 
-    const githubLink = document.getElementById('previewGithub');
-    githubLink.href = github;
-    githubLink.textContent = github;
+        // Check email registration
+        if (!emailData.success) {
+            emailInput.classList.add('is-invalid');
+            emailErrorEl.textContent = 'This email address is not registered';
+            hasError = true;
+        }
 
-    const videoLink = document.getElementById('previewVideo');
-    videoLink.href = video;
-    videoLink.textContent = video;
+        // Check GitHub URL uniqueness
+        if (!githubData.success) {
+            githubInput.classList.add('is-invalid');
+            githubErrorEl.textContent = 'This repository has already been submitted';
+            hasError = true;
+        }
 
-    const liveDemoLink = document.getElementById('previewLiveDemo');
-    liveDemoLink.href = liveDemo;
-    liveDemoLink.textContent = liveDemo;
+        // If any validation fails, stop preview
+        if (hasError) {
+            showAlert('Please correct the highlighted fields', 'warning');
+            return;
+        }
 
-    // Handle optional credentials
-    const credentialsSection = document.getElementById('previewCredentials');
-    if (username && password) {
-        document.getElementById('previewUsername').textContent = username;
-        document.getElementById('previewPassword').textContent = password;
-        credentialsSection.classList.remove('d-none');
-    } else {
-        credentialsSection.classList.add('d-none');
-    }
+        // Update preview modal content
+        document.getElementById('previewEmail').textContent = email;
+        document.getElementById('previewTeamName').textContent = teamName;
+        document.getElementById('previewProjectName').textContent = projectName;
 
-    // Reset terms checkbox and submit button state
-    const termsCheck = document.getElementById('termsCheck');
-    const submitBtn = document.getElementById('submitProjectBtn');
-    if (termsCheck && submitBtn) {
-        termsCheck.checked = false;
-        submitBtn.disabled = true;
-        termsCheck.addEventListener('change', function() {
-            submitBtn.disabled = !this.checked;
-        });
-    }
+        const githubLink = document.getElementById('previewGithub');
+        githubLink.href = github;
+        githubLink.textContent = github;
 
+        const videoLink = document.getElementById('previewVideo');
+        videoLink.href = video;
+        videoLink.textContent = video;
 
-    // Show preview modal
-    const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
-    previewModal.show();
+        const liveDemoLink = document.getElementById('previewLiveDemo');
+        liveDemoLink.href = liveDemo;
+        liveDemoLink.textContent = liveDemo;
+
+        // Handle optional credentials
+        const credentialsSection = document.getElementById('previewCredentials');
+        if (username && password) {
+            document.getElementById('previewUsername').textContent = username;
+            document.getElementById('previewPassword').textContent = password;
+            credentialsSection.classList.remove('d-none');
+        } else {
+            credentialsSection.classList.add('d-none');
+        }
+
+        // Reset terms checkbox and submit button state
+        const termsCheck = document.getElementById('termsCheck');
+        const submitBtn = document.getElementById('submitProjectBtn');
+        if (termsCheck && submitBtn) {
+            termsCheck.checked = false;
+            submitBtn.disabled = true;
+            termsCheck.addEventListener('change', function() {
+                submitBtn.disabled = !this.checked;
+            });
+        }
+
+        // Show preview modal
+        const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
+        previewModal.show();
+    })
+    .catch(error => {
+        console.error('Validation error:', error);
+        showAlert('An error occurred during validation', 'danger');
+    });
 }
 
 function submitFinalProject() {
@@ -486,25 +558,39 @@ function editEmail(button) {
     const row = button.closest('tr');
     const emailText = row.querySelector('.email-text');
     const emailInput = row.querySelector('input[type="email"]');
+    const teamSelect = row.querySelector('.team-select');
 
     if (emailText.classList.contains('d-none')) {
         // Save changes
         const newEmail = emailInput.value.trim();
         const oldEmail = emailText.textContent;
+        const newTeam = teamSelect.value;
 
         fetch('/admin/emails/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ oldEmail, newEmail })
+            body: JSON.stringify({
+                old_email: oldEmail,
+                new_email: newEmail,
+                team: newTeam
+            })
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update email text
                     emailText.textContent = newEmail;
+                    
+                    // Update team selection if changed
+                    if (newTeam) {
+                        teamSelect.value = newTeam;
+                    }
+                    
                     showAlert('Email updated successfully', 'success');
                 } else {
+                    // Revert to original values if update fails
                     emailInput.value = oldEmail;
                     showAlert(data.message || 'Failed to update email', 'danger');
                 }
@@ -515,6 +601,7 @@ function editEmail(button) {
                 emailInput.value = oldEmail;
             });
 
+        // Hide input and show text
         emailText.classList.remove('d-none');
         emailInput.classList.add('d-none');
         button.innerHTML = '<i class="bi bi-pencil-fill"></i>';
@@ -1100,67 +1187,6 @@ function validateInput(event) {
         validationIcon.classList.add('invalid');
         validationIcon.classList.remove('valid');
     }
-}
-
-function previewSubmission() {
-    // Get all form values
-    const email = document.getElementById('email').value;
-    const teamName = document.getElementById('team_name').value;
-    const projectName = document.getElementById('project_name').value;
-    const github = document.getElementById('github').value;
-    const video = document.getElementById('video').value;
-    const liveDemo = document.getElementById('live_demo_url').value;
-    const username = document.getElementById('demo_username').value;
-    const password = document.getElementById('demo_password').value;
-
-    // Validate required fields
-    if (!email || !teamName || !projectName || !github || !video || !liveDemo) {
-        showAlert('Please fill in all required fields before previewing', 'warning');
-        return;
-    }
-
-    // Update preview modal content
-    document.getElementById('previewEmail').textContent = email;
-    document.getElementById('previewTeamName').textContent = teamName;
-    document.getElementById('previewProjectName').textContent = projectName;
-
-    const githubLink = document.getElementById('previewGithub');
-    githubLink.href = github;
-    githubLink.textContent = github;
-
-    const videoLink = document.getElementById('previewVideo');
-    videoLink.href = video;
-    videoLink.textContent = video;
-
-    const liveDemoLink = document.getElementById('previewLiveDemo');
-    liveDemoLink.href = liveDemo;
-    liveDemoLink.textContent = liveDemo;
-
-    // Handle optional credentials
-    const credentialsSection = document.getElementById('previewCredentials');
-    if (username && password) {
-        document.getElementById('previewUsername').textContent = username;
-        document.getElementById('previewPassword').textContent = password;
-        credentialsSection.classList.remove('d-none');
-    } else {
-        credentialsSection.classList.add('d-none');
-    }
-
-    // Reset terms checkbox and submit button state
-    const termsCheck = document.getElementById('termsCheck');
-    const submitBtn = document.getElementById('submitProjectBtn');
-    if (termsCheck && submitBtn) {
-        termsCheck.checked = false;
-        submitBtn.disabled = true;
-        termsCheck.addEventListener('change', function() {
-            submitBtn.disabled = !this.checked;
-        });
-    }
-
-
-    // Show preview modal
-    const previewModal = new bootstrap.Modal(document.getElementById('previewSubmissionModal'));
-    previewModal.show();
 }
 
 function loadWinners() {
