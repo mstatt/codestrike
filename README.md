@@ -248,11 +248,3 @@ pillow==11.1.0
 transformers==4.48.3
 torch==2.6.0
 ```
-
-## License
-
-Copyright @2025 by FALCONS.AI - All rights reserved
-
-## Support
-
-For technical support or questions, contact: info@falcons.ai
